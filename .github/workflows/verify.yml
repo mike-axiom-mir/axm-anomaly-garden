@@ -19,9 +19,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax check engine
+      - name: Syntax check core engine
         run: node --check src/sim.js
+      - name: Syntax check v0.7 extension
+        run: node --check src/v07.js
       - name: Syntax check browser controller
         run: node --check src/app.js
-      - name: Deterministic simulation tests
-        run: node tests/sim.test.js
+      - name: Full deterministic regression suite
+        run: npm test

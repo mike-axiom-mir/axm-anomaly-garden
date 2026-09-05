@@ -1,6 +1,6 @@
 'use strict';
 
-const { GardenSimulation } = require('../src/sim.js');
+const { GardenSimulation } = require('../src/v07.js');
 
 function run(policy, seed) {
   const sim = new GardenSimulation({ seed, repairPolicy: policy });

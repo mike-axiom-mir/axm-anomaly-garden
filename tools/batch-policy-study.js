@@ -1,6 +1,6 @@
 'use strict';
 
-const { GardenSimulation } = require('../src/sim.js');
+const { GardenSimulation } = require('../src/v07.js');
 
 function run(policy, seed) {
   const sim = new GardenSimulation({ seed, repairPolicy: policy });
@@ -28,7 +28,10 @@ function run(policy, seed) {
     institutionReports: sim.metrics.institutionReports,
     narrativeChanges: sim.metrics.narrativeChanges,
     institutionBroadcasts: sim.metrics.institutionBroadcasts,
-    receipts: sim.receipts.length
+    institutionProposals: sim.metrics.institutionProposals,
+    institutionCommitments: sim.metrics.institutionCommitments,
+    institutionSessions: sim.metrics.institutionSessions,
+    receipts: sim.totalReceiptCount()
   };
 }
 
@@ -60,6 +63,9 @@ for (const policy of policies) {
       institutionReports: Number(average(rows, 'institutionReports').toFixed(2)),
       narrativeChanges: Number(average(rows, 'narrativeChanges').toFixed(2)),
       institutionBroadcasts: Number(average(rows, 'institutionBroadcasts').toFixed(2)),
+      institutionProposals: Number(average(rows, 'institutionProposals').toFixed(2)),
+      institutionCommitments: Number(average(rows, 'institutionCommitments').toFixed(2)),
+      institutionSessions: Number(average(rows, 'institutionSessions').toFixed(2)),
       receipts: Number(average(rows, 'receipts').toFixed(2))
     },
     modelBreakFreeRuns: rows.filter((row) => row.modelBreaks === 0).length,

@@ -1,6 +1,6 @@
 'use strict';
 
-const { GardenSimulation } = require('../src/sim.js');
+const { GardenSimulation } = require('../src/v07.js');
 
 function run(policy, seed) {
   const sim = new GardenSimulation({ seed, repairPolicy: policy });
@@ -14,6 +14,9 @@ function run(policy, seed) {
   return {
     reports: sim.metrics.institutionReports,
     narrativeChanges: sim.metrics.narrativeChanges,
+    proposals: sim.metrics.institutionProposals,
+    commitments: sim.metrics.institutionCommitments,
+    sessions: sim.metrics.institutionSessions,
     institutions: sim.institutions.map((institution) => ({
       id: institution.id,
       narrative: institution.narrative,
@@ -44,6 +47,9 @@ for (const policy of ['off', 'tolerant', 'aggressive']) {
     runs: count,
     averageReports: Number(average(rows.map((row) => row.reports)).toFixed(2)),
     averageNarrativeChanges: Number(average(rows.map((row) => row.narrativeChanges)).toFixed(2)),
+    averageProposals: Number(average(rows.map((row) => row.proposals)).toFixed(2)),
+    averageCommitments: Number(average(rows.map((row) => row.commitments)).toFixed(2)),
+    averageSessions: Number(average(rows.map((row) => row.sessions)).toFixed(2)),
     finalNarratives: distributions
   };
 }

@@ -1,12 +1,14 @@
 {
   "name": "axm-anomaly-garden",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Offline deterministic causal simulation playground.",
   "scripts": {
-    "test": "node tests/sim.test.js && node tests/life.test.js && node tests/institutions.test.js",
+    "test": "node tests/sim.test.js && node tests/life.test.js && node tests/institutions.test.js && node tests/institution-actions.test.js && node tests/history.test.js",
     "experiment:repair": "node tools/compare-repair-policies.js",
     "study:repair": "node tools/batch-policy-study.js 24",
-    "study:institutions": "node tools/institution-study.js 24"
+    "study:institutions": "node tools/institution-study.js 24",
+    "study:institution-actions": "node tools/institution-action-study.js 24",
+    "study:history": "node tools/history-compaction-study.js"
   }
 }

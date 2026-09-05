@@ -48,7 +48,7 @@ The current build is deliberately offline and dependency-free in the browser: op
 - anomaly information propagates only through existing relationships and local encounter distance
 - successful exchanges alter the persistent relationship state
 
-### Bounded institutions
+### Bounded institutions + voluntary proposals
 
 - three institutions exist: Inquiry Circle, Maintenance Guild, and Commons Assembly
 - each inhabitant belongs to one institution with a persistent trust value
@@ -56,7 +56,10 @@ The current build is deliberately offline and dependency-free in the browser: op
 - they receive rate-limited, source-linked member reports derived from observations, Modal memory, tests, or social testimony
 - each institution accumulates evidence and changes its own narrative using different explicit thresholds/frames
 - institutions periodically broadcast their current interpretation to members, which can modestly affect confidence/discrepancy
-- every report, narrative change, and broadcast is receipted
+- a non-prior narrative can generate a temporary action proposal without receiving machine truth
+- members accept proposals probabilistically from their own trust/needs/traits; acceptance is never guaranteed and the whole action layer has an explicit off switch
+- accepted participation is phase-bounded, and personal investigation can still override it
+- every report, narrative change, proposal, acceptance, session, and commitment end is causally inspectable
 
 ### Modal zones
 
@@ -82,7 +85,8 @@ The current build is deliberately offline and dependency-free in the browser: op
 - rewind to the latest retained checkpoint
 - rewind archives the abandoned future with its fingerprint and full state before restoring the checkpoint
 - the restored branch records both the archive event and the rewind intervention
-- complete JSON state export/import including topology, receipts, Modals, repair nodes, checkpoints, counters, and RNG state
+- complete JSON state export/import including topology, hot/cold receipts, Modals, repair nodes, institutions, checkpoints, counters, branch archive, and RNG state
+- exact cold-history compaction can move old receipt objects out of the hot graph without changing the canonical fingerprint or breaking ancestry lookup
 
 ### Worldglass
 
@@ -97,7 +101,8 @@ The interface deliberately shows two different layers:
 - repair programs and policy
 - Modal zones
 - relationship edge count
-- causal receipts
+- causal receipts, including exact cold-history chunks
+- institution narratives/proposals and voluntary commitments
 - archived abandoned futures
 - deterministic state fingerprint
 
@@ -107,11 +112,11 @@ The inhabitants do not automatically receive information merely because Worldgla
 
 `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` records a 24-seed comparison using the same intervention script under three repair policies.
 
-Inside the current ruleset, average model breaks across those runs were:
+Inside the current v0.7.0 ruleset, average model breaks across those runs were:
 
-- repair off: **12.79**
-- tolerant repair: **5.67**
-- aggressive repair: **0.08**
+- repair off: **13.38**
+- tolerant repair: **5.58**
+- aggressive repair: **0.04**
 
 That is a property of this simulation, not a general real-world claim. The experiment is retained so later engine changes can be compared against it rather than relying on memory or vibes.
 
@@ -121,9 +126,9 @@ Run it with:
 node tools/batch-policy-study.js 24
 ```
 
-The same batch now also tracks institutional reporting/narrative changes. `EXPERIMENTS/INSTITUTION_NARRATIVE_STUDY_001.md` records final narrative distributions and the hard boundary that institutions never receive machine truth.
+The same batch also tracks institutional reporting/narrative changes. `EXPERIMENTS/INSTITUTION_NARRATIVE_STUDY_001.md` records final narrative distributions and the hard boundary that institutions never receive machine truth. `EXPERIMENTS/INSTITUTION_ACTION_STUDY_001.md` separately toggles the proposal layer on/off so institutional influence is testable rather than assumed.
 
-The same batch also exposes a built-in tradeoff in the current rules: investigation overrides routine movement, so worlds with more persistent anomaly investigation spend less time on scheduled work and social meetings. `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md` records that result and explicitly separates the rule-driven direction from the seed-dependent magnitude.
+The same batch also exposes a built-in time-allocation tradeoff: investigation can override ordinary routine and accepted institution commitments can redirect only phase-appropriate time. `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md` records that result and explicitly separates designed direction from seed-dependent magnitude. `EXPERIMENTS/COLD_HISTORY_STUDY_001.md` records exact causal-history compaction with fingerprint preservation.
 
 ## Checks
 
@@ -150,7 +155,8 @@ The current suite checks:
 - exact deterministic continuation after restoring RNG state
 - inhabitant-authored investigation tests
 - abandoned-future archive preservation across rewind and export/import
-- institutional bounded-knowledge rules, report provenance, narrative change, broadcasts, and deterministic round-trip
+- institutional bounded-knowledge rules, report provenance, narrative change, voluntary proposals/commitments, sessions, opt-out configuration, and deterministic round-trip
+- exact cold-history compaction, hot→cold causal ancestry, fingerprint preservation, and deterministic continuation after import
 
 ## Truth boundary
 
@@ -162,7 +168,7 @@ The project is fiction-inspired, but fiction is not evidence. Claims about real 
 
 ## Direction, not destination
 
-The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography, deeper institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
+The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography, institution dissent/factions, competing machine programs, nested Modals, reopenable branch trees, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
 
 The guiding question remains:
 

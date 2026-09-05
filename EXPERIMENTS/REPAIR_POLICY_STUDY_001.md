@@ -1,32 +1,12 @@
 # Experiment 001 — Repair Pressure vs Anomaly Discovery
 
-Status: **measured inside the current Anomaly Garden ruleset**
+Status: **measured inside Anomaly Garden v0.7.0**
 
-This is not a claim about humans, AI cognition, society, or physical reality. It measures only the simulation currently implemented in this repository.
-
-## Question
-
-If the same perturbations occur in otherwise deterministic seeded worlds, how does local machine repair pressure change the amount of anomaly evidence that reaches inhabitants and propagates through the social fabric?
+This is not a claim about humans, AI cognition, society, or physical reality. It measures only the current simulation.
 
 ## Fixed intervention script
 
-For each seed and each repair policy:
-
-1. initialize the same seeded world structure for that policy
-2. plant one Modal at `(5,4)` with radius `3.4`, period `11`, memory leak `0.32`
-3. add one `loop-echo` anomaly at `(5,4)`
-4. run 9 ticks
-5. whisper to inhabitant 1
-6. run 13 ticks
-7. add one `gravity-slip` anomaly at `(7,3)`
-8. run 58 ticks
-9. collect metrics at tick 80
-
-Only the repair policy differs: `off`, `tolerant`, or `aggressive`.
-
-## 24-seed batch result
-
-Command:
+For each seed and repair policy: plant the same Modal and `loop-echo`, run 9 ticks, whisper to inhabitant 1, run 13 ticks, add the same `gravity-slip`, then run to tick 80. Only repair policy changes.
 
 ```bash
 node tools/batch-policy-study.js 24
@@ -34,53 +14,33 @@ node tools/batch-policy-study.js 24
 
 | Metric average | Repair off | Tolerant | Aggressive |
 | --- | ---: | ---: | ---: |
-| anomaly observations | 476.71 | 186.29 | 23.79 |
-| investigations | 13.00 | 6.00 | 0.21 |
-| model breaks | 12.79 | 5.67 | 0.08 |
-| social signals | 116.71 | 37.04 | 1.79 |
+| anomaly observations | 479.21 | 181.33 | 24.13 |
+| investigations | 13.46 | 6.21 | 0.17 |
+| model breaks | 13.38 | 5.58 | 0.04 |
+| social signals | 118.33 | 36.92 | 1.54 |
 | repair actions | 0.00 | 10.00 | 8.00 |
-| modal memory leaks | 13.92 | 13.21 | 13.63 |
-| inhabitant-authored tests | 70.42 | 35.17 | 1.42 |
-| workplace production | 13.17 | 16.29 | 18.62 |
-| social meetings | 6.92 | 11.38 | 19.21 |
-| projects completed | 0.50 | 1.25 | 1.46 |
-| resources acquired | 13.04 | 14.63 | 15.13 |
-| resources used | 23.92 | 25.38 | 25.50 |
-| institution member reports | 86.71 | 86.29 | 33.00 |
-| institution narrative changes | 5.50 | 5.42 | 3.63 |
-| institution broadcasts | 18.00 | 18.00 | 18.00 |
-| causal receipts | 856.83 | 457.96 | 181.13 |
+| Modal memory leaks | 14.29 | 13.67 | 13.83 |
+| inhabitant-authored tests | 71.67 | 36.71 | 1.25 |
+| workplace production | 11.34 | 13.81 | 16.66 |
+| social meetings | 3.33 | 6.33 | 12.08 |
+| projects completed | 0.33 | 1.13 | 1.13 |
+| institution member reports | 162.50 | 116.33 | 34.00 |
+| narrative changes | 5.75 | 5.67 | 3.96 |
+| institution proposals | 16.67 | 16.46 | 11.83 |
+| voluntary commitments | 46.75 | 48.75 | 38.38 |
+| institution sessions | 14.75 | 22.13 | 22.38 |
+| causal receipts | 1058.96 | 609.29 | 274.63 |
 
-Additional counts across 24 runs:
+Across 24 runs, aggressive repair produced no model break in 23/24 and no investigation in 21/24.
 
-- repair off: 0/24 runs without model breaks; 0/24 without investigations
-- tolerant repair: 0/24 runs without model breaks; 0/24 without investigations
-- aggressive repair: 22/24 runs without model breaks; 20/24 without investigations
+## What this supports
 
-## What this result does support
+Inside this exact model, aggressive repair usually removes anomaly-object evidence before enough accumulates to produce the same investigation cascades seen under weaker repair. Modal memory and institution/report paths remain distinct mechanisms.
 
-Inside **this exact implemented model**, aggressive repair usually removes anomaly evidence before enough of it accumulates to produce investigation and social cascades. Tolerant repair reduces discovery pressure but does not normally erase it. With repair disabled, anomaly evidence persists long enough to create substantially more observations, investigations, model breaks, and social propagation.
+## What this does not support
 
-The Modal memory-leak mechanic remains active under every policy. Inhabitants that enter investigation can also run their own tests, which adds a third route for evidence to strengthen or weaken discrepancy. Repair programs currently repair anomaly objects, not Modal memory fragments or test results, so these mechanisms remain intentionally distinct.
-
-## What this result does not support
-
-This experiment does not establish that:
-
-- suppression causes curiosity in real people
-- censorship or control has any particular real-world social effect
-- consciousness emerges from discrepancy
-- AI systems naturally behave like these inhabitants
-- the Matrix franchise describes real machine architecture
-- less repair is inherently better
-
-Those would require different evidence entirely.
-
-## Why keep this experiment
-
-It is a useful regression target. Future changes to repair programs, perception, social topology, memory, or Modal behavior can rerun this study and show whether the causal character of the garden changed.
-
+It does not establish real-world claims about suppression, curiosity, censorship, consciousness, AI behavior, institutional truth, or whether less repair is better.
 
 ## Revision note
 
-The table above is now generated against v0.6.1. The bounded-institution layer adds report, narrative, and broadcast receipts, while the v0.6.1 runtime indexes deliberately do not alter simulation state. The core cascade/ordinary-life metrics remained identical across the v0.6 → v0.6.1 optimization run; only lookup cost changed. Older measurements remain in Git history rather than being silently rewritten away.
+v0.7 adds voluntary institution action proposals. Because those proposals can change movement and encounter patterns, the entire 24-seed table was rerun rather than carrying forward v0.6.1 values.

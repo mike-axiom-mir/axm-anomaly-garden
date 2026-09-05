@@ -1,4 +1,4 @@
-# Lane 001 — First Garden Heartbeat → Persistent Causal World
+# Lane 001 — First Garden Heartbeat → Bounded Causal Civilization
 
 Branch: `build/first-garden-2026-09-05`
 
@@ -20,6 +20,8 @@ Turn the empty repository into a truthful playable simulation foundation with en
 - investigator-authored tests against anomalies and repeating Modals
 - persistent relationship topology with trust/familiarity/signal/meeting state
 - bounded institutions with membership, source-linked reports, evidence accumulation, competing narrative frames, and periodic broadcasts without raw machine truth
+- narrative-derived action proposals that carry no machine-truth fields, remain probabilistic/voluntary, can be disabled, and redirect only phase-appropriate time
+- institution sessions use the inhabitant's own retained evidence rather than privileged anomaly access
 - social anomaly sharing constrained by relationship + physical proximity
 - repeating Modal zones with anchored inhabitants and configurable memory leakage
 - local repair programs with off/tolerant/aggressive policies
@@ -34,6 +36,8 @@ Turn the empty repository into a truthful playable simulation foundation with en
 - reproducible browser experiment presets
 - command-line repair-policy, productive-life, long-run, and institution-narrative experiments
 - runtime receipt/agent/place/anomaly indexes that preserve the exact state result while reducing long-run lookup cost
+- exact cold-history chunks that remove old receipt objects from the hot graph while preserving ids, payloads, parents, causal lookup, export/import, and canonical fingerprint
+- Worldglass now exposes institution narratives/proposals, commitments, productive-life details, and hot/cold receipt counts
 
 ## Deliberate non-claims
 
@@ -47,11 +51,13 @@ node --check src/sim.js
 node --check src/app.js
 node tools/compare-repair-policies.js
 node tools/batch-policy-study.js 24
+node tools/institution-action-study.js 24
+node tools/history-compaction-study.js
 ```
 
 Current deterministic test suite: **PASS**.
 
-The 24-seed study is recorded in `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` with explicit scope limits. Productive-life tradeoff, bounded-institution narrative distributions, and 2,000-tick scaling/optimization notes are recorded separately under `EXPERIMENTS/`.
+The 24-seed repair study is recorded in `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` with explicit scope limits. Productive-life tradeoff, bounded-institution narrative distributions, voluntary proposal toggle results, exact cold-history measurements, and prior long-run scaling notes are recorded separately under `EXPERIMENTS/`.
 
 ## Browser truth boundary
 
@@ -66,14 +72,14 @@ The earlier headless Chromium attempt in this environment hung before rendering 
 - repair programs act only on anomaly objects, not every possible inconsistent state
 - causal links cover major transitions but are not yet a complete provenance edge for every numeric state change
 - abandoned futures are preserved, but there is not yet a dedicated browser for opening and comparing archived branches side-by-side
-- JSON saves are complete current-state archives, not compressed long-term storage
+- JSON saves now support exact tuple-encoded cold causal history, but the cold format is still JSON text rather than a final binary/page-indexed archive
 - UI has not yet received the real-browser visual smoke test described above
 
 ## Next useful deepening
 
-1. Deepen the new productive-life layer into multiple task types, richer resource chains, leisure choices, trade, ownership transfer, and projects that can alter the shared world.
+1. Deepen the productive-life layer into multiple task types, richer resource chains, leisure choices, trade, ownership transfer, and projects that can alter the shared world.
 2. Deepen inhabitant-authored experiments so investigators can repeat tests, compare results, share methods, and design stronger tests from prior evidence.
-3. Deepen institutions into internal factions, membership change, evidence challenge, dissent, and cross-institution debate while preserving bounded knowledge.
+3. Deepen institutions into internal factions, membership change, evidence challenge, dissent, cross-institution debate, and proposal outcomes while preserving bounded knowledge and voluntary participation.
 4. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.
 5. Add a branch-tree browser so archived futures can be reopened, compared, and forked without replacing canonical state.
 6. Add resource budgets and Smith-style replication experiments with locally valid but globally harmful transitions.

@@ -48,7 +48,8 @@
     repairNodeCount: 2,
     repairRadius: 1.6,
     repairStep: 0.18,
-    repairCooldown: 3
+    repairCooldown: 3,
+    testCooldown: 6
   });
 
   function makeId(prefix, n) {
@@ -58,7 +59,7 @@
   class GardenSimulation {
     constructor(options) {
       const opts = options || {};
-      this.version = '0.2.0';
+      this.version = '0.3.0';
       this.config = Object.assign({}, DEFAULT_CONFIG, opts.config || {});
       this.seedText = String(opts.seed || 'rabbit-001');
       this.seed = hashSeed(this.seedText);
@@ -72,11 +73,13 @@
       this.relationships = [];
       this.repairNodes = [];
       this.checkpoints = [];
+      this.branchArchive = [];
       this.repairPolicy = opts.repairPolicy || 'tolerant';
       this.nextReceiptId = 1;
       this.nextAnomalyId = 1;
       this.nextModalId = 1;
       this.nextCheckpointId = 1;
+      this.nextBranchId = 1;
       this.agents = [];
       this.metrics = {
         observations: 0,
@@ -87,7 +90,9 @@
         repairActions: 0,
         modalResets: 0,
         memoryLeaks: 0,
-        rewinds: 0
+        rewinds: 0,
+        testsRun: 0,
+        archivedBranches: 0
       };
       this._createAgents();
       this._createRelationships();
@@ -112,6 +117,7 @@
           curiosity: round(0.18 + this.random() * 0.78),
           skepticism: round(0.18 + this.random() * 0.68),
           social: round(0.2 + this.random() * 0.7),
+          testSkill: round(0.2 + this.random() * 0.72),
           threshold: round(0.48 + this.random() * 0.38),
           confidence: round(0.88 + this.random() * 0.1),
           discrepancy: 0,
@@ -120,6 +126,8 @@
           awakened: false,
           memory: [],
           modalMemory: {},
+          testsRun: 0,
+          lastTestTick: -999,
           lastObservation: 'ordinary day'
         });
       }
@@ -265,7 +273,7 @@
         label: String(label || 'Checkpoint ' + id),
         tick: this.tick,
         receiptId: receipt.id,
-        state: this._captureState(false)
+        state: this._captureState(false, false)
       };
       this.checkpoints.push(checkpoint);
       return { id: checkpoint.id, label: checkpoint.label, tick: checkpoint.tick, receiptId: checkpoint.receiptId };
@@ -275,16 +283,42 @@
       const checkpoint = this.checkpoints.find((item) => item.id === checkpointId);
       if (!checkpoint) return null;
       const fromTick = this.tick;
+      const abandonedFingerprint = this.stateFingerprint();
+      const abandonedState = this._captureState(false, false);
+      const priorArchives = deepClone(this.branchArchive);
+      const branchId = makeId('branch', this.nextBranchId++);
+      const abandonedBranch = {
+        id: branchId,
+        checkpointId: checkpoint.id,
+        fromTick,
+        toTick: checkpoint.tick,
+        fingerprint: abandonedFingerprint,
+        receiptCount: this.receipts.length,
+        metrics: deepClone(this.metrics),
+        state: abandonedState
+      };
       const preservedCheckpoints = this.checkpoints.filter((item) => item.tick <= checkpoint.tick).map((item) => deepClone(item));
       this._restoreState(checkpoint.state);
       this.checkpoints = preservedCheckpoints;
+      this.branchArchive = priorArchives.concat([abandonedBranch]);
+      this.nextBranchId = Math.max(this.nextBranchId, this.branchArchive.length + 1);
       this.metrics.rewinds += 1;
+      this.metrics.archivedBranches = this.branchArchive.length;
+      const archiveReceipt = this._receipt('system.branch-archived', {
+        branchId,
+        checkpointId: checkpoint.id,
+        abandonedFromTick: fromTick,
+        restoredToTick: this.tick,
+        abandonedFingerprint,
+        abandonedReceiptCount: abandonedBranch.receiptCount
+      }, [checkpoint.receiptId]);
       const receipt = this._receipt('intervention.rewind', {
         checkpointId: checkpoint.id,
+        branchId,
         fromTick,
         toTick: this.tick
-      }, [checkpoint.receiptId]);
-      this._recordIntervention('rewind', { checkpointId: checkpoint.id, fromTick, toTick: this.tick }, receipt.id);
+      }, [archiveReceipt.id]);
+      this._recordIntervention('rewind', { checkpointId: checkpoint.id, branchId, fromTick, toTick: this.tick }, receipt.id);
       return receipt;
     }
 
@@ -484,6 +518,82 @@
       }
     }
 
+    _maybeRunInvestigationTest(agent) {
+      if (!agent.investigating || this.tick - agent.lastTestTick < this.config.testCooldown) return null;
+      const attemptChance = clamp(0.04 + agent.curiosity * 0.15 + agent.testSkill * 0.11, 0.05, 0.32);
+      if (this.random() >= attemptChance) return null;
+
+      const anomalies = this.anomalies.filter((a) => a.active && this._distance(agent, a) <= 2.6)
+        .sort((a, b) => this._distance(agent, a) - this._distance(agent, b));
+      const modals = this.modalZones.filter((z) => z.active && z.iteration > 0 && this._distance(agent, z) <= z.radius)
+        .sort((a, b) => this._distance(agent, a) - this._distance(agent, b));
+      const parent = agent.memory.length ? agent.memory[agent.memory.length - 1].receiptId : null;
+      agent.lastTestTick = this.tick;
+      agent.testsRun += 1;
+      this.metrics.testsRun += 1;
+
+      if (anomalies.length) {
+        const target = anomalies[0];
+        const precision = clamp(0.42 + agent.testSkill * 0.36 + agent.skepticism * 0.2, 0, 0.98);
+        const strength = target.intensity * precision;
+        const supports = this.random() < clamp(0.22 + strength * 0.7, 0.08, 0.96);
+        const before = agent.discrepancy;
+        if (supports) {
+          agent.discrepancy = clamp(agent.discrepancy + 0.09 + strength * 0.1, 0, 1.5);
+          agent.confidence = clamp(agent.confidence - 0.04 - strength * 0.035, 0, 1);
+          agent.lastObservation = 'my test reproduced part of the inconsistency';
+        } else {
+          agent.discrepancy = clamp(agent.discrepancy - 0.035, 0, 1.5);
+          agent.confidence = clamp(agent.confidence + 0.018, 0, 1);
+          agent.lastObservation = 'my test did not reproduce the anomaly';
+        }
+        const receipt = this._receipt('inhabitant.ran-test', {
+          agentId: agent.id,
+          targetType: 'anomaly',
+          targetId: target.id,
+          testNumber: agent.testsRun,
+          precision: round(precision),
+          strength: round(strength),
+          result: supports ? 'supports-inconsistency' : 'inconclusive',
+          discrepancyBefore: round(before),
+          discrepancyAfter: round(agent.discrepancy)
+        }, [this._findCreationReceipt(target.id), parent].filter(Boolean));
+        this._remember(agent, receipt.id, agent.lastObservation);
+        return receipt;
+      }
+
+      if (modals.length) {
+        const zone = modals[0];
+        const fragments = agent.modalMemory[zone.id] || 0;
+        const supports = fragments > 0;
+        const before = agent.discrepancy;
+        if (supports) {
+          agent.discrepancy = clamp(agent.discrepancy + 0.08 + Math.min(0.12, fragments * 0.025), 0, 1.5);
+          agent.lastObservation = 'my timing test found the repeating sequence again';
+        } else {
+          agent.discrepancy = clamp(agent.discrepancy - 0.025, 0, 1.5);
+          agent.lastObservation = 'the suspected loop did not repeat for me';
+        }
+        const creation = this.receipts.find((r) => r.type === 'intervention.modal-added' && r.payload.modal && r.payload.modal.id === zone.id);
+        const receipt = this._receipt('inhabitant.ran-test', {
+          agentId: agent.id,
+          targetType: 'modal',
+          targetId: zone.id,
+          testNumber: agent.testsRun,
+          modalIteration: zone.iteration,
+          retainedFragments: fragments,
+          result: supports ? 'supports-loop' : 'inconclusive',
+          discrepancyBefore: round(before),
+          discrepancyAfter: round(agent.discrepancy)
+        }, [creation ? creation.id : null, parent].filter(Boolean));
+        this._remember(agent, receipt.id, agent.lastObservation);
+        return receipt;
+      }
+
+      agent.lastTestTick = this.tick - this.config.testCooldown + 2;
+      return null;
+    }
+
     _eligibleForRepair(anomaly) {
       if (!anomaly.active || this.repairPolicy === 'off') return false;
       if (this.repairPolicy === 'aggressive') return true;
@@ -539,6 +649,8 @@
         this._move(agent);
         this._observe(agent);
         this._updateBelief(agent);
+        this._maybeRunInvestigationTest(agent);
+        this._updateBelief(agent);
       }
       this._socialExchange();
       for (const agent of this.agents) this._updateBelief(agent);
@@ -551,7 +663,7 @@
       return this.snapshot();
     }
 
-    _captureState(includeCheckpoints) {
+    _captureState(includeCheckpoints, includeArchive) {
       const state = {
         version: this.version,
         seedText: this.seedText,
@@ -573,9 +685,11 @@
           nextReceiptId: this.nextReceiptId,
           nextAnomalyId: this.nextAnomalyId,
           nextModalId: this.nextModalId,
-          nextCheckpointId: this.nextCheckpointId
+          nextCheckpointId: this.nextCheckpointId,
+          nextBranchId: this.nextBranchId
         }
       };
+      if (includeArchive !== false) state.branchArchive = deepClone(this.branchArchive);
       if (includeCheckpoints !== false) {
         state.checkpoints = this.checkpoints.map((cp) => ({ id: cp.id, label: cp.label, tick: cp.tick, receiptId: cp.receiptId, state: deepClone(cp.state) }));
       }
@@ -584,7 +698,7 @@
 
     _restoreState(state) {
       const s = deepClone(state);
-      this.version = s.version || '0.2.0';
+      this.version = s.version || '0.3.0';
       this.seedText = s.seedText;
       this.seed = s.seed;
       this.config = Object.assign({}, DEFAULT_CONFIG, s.config || {});
@@ -597,19 +711,21 @@
       this.relationships = s.relationships || [];
       this.repairNodes = s.repairNodes || [];
       this.repairPolicy = s.repairPolicy || 'tolerant';
+      this.branchArchive = s.branchArchive || [];
       this.receipts = s.receipts || [];
       this.interventions = s.interventions || [];
       this.interventionLog = s.interventionLog || [];
-      this.metrics = Object.assign({ observations: 0, investigations: 0, socialSignals: 0, thresholdCrossings: 0, awakenings: 0, repairActions: 0, modalResets: 0, memoryLeaks: 0, rewinds: 0 }, s.metrics || {});
+      this.metrics = Object.assign({ observations: 0, investigations: 0, socialSignals: 0, thresholdCrossings: 0, awakenings: 0, repairActions: 0, modalResets: 0, memoryLeaks: 0, rewinds: 0, testsRun: 0, archivedBranches: 0 }, s.metrics || {});
       this.nextReceiptId = s.counters ? s.counters.nextReceiptId : this.receipts.length + 1;
       this.nextAnomalyId = s.counters ? s.counters.nextAnomalyId : this.anomalies.length + 1;
       this.nextModalId = s.counters ? s.counters.nextModalId : this.modalZones.length + 1;
       this.nextCheckpointId = s.counters ? s.counters.nextCheckpointId : 1;
+      this.nextBranchId = s.counters && s.counters.nextBranchId ? s.counters.nextBranchId : this.branchArchive.length + 1;
       if (s.checkpoints) this.checkpoints = s.checkpoints;
     }
 
     serialize() {
-      return JSON.stringify({ schema: 'axm-anomaly-garden/state-v1', state: this._captureState(true) }, null, 2);
+      return JSON.stringify({ schema: 'axm-anomaly-garden/state-v1', state: this._captureState(true, true) }, null, 2);
     }
 
     static deserialize(text) {
@@ -626,11 +742,12 @@
         seed: this.seed,
         rng: this.random.getState(),
         repairPolicy: this.repairPolicy,
-        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length]),
+        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length, a.testsRun]),
         anomalies: this.anomalies.map((a) => [a.id, a.kind, a.x, a.y, round(a.intensity), a.ttl, a.active]),
         modals: this.modalZones.map((z) => [z.id, z.iteration, z.active]),
         relationships: this.relationships.map((r) => [r.id, round(r.trust), round(r.familiarity), r.signals]),
         repairNodes: this.repairNodes.map((n) => [n.id, n.x, n.y, n.actions]),
+        archivedBranches: this.branchArchive.map((b) => [b.id, b.fromTick, b.toTick, b.fingerprint]),
         receipts: this.receipts.length
       };
       return hashSeed(JSON.stringify(material)).toString(16).padStart(8, '0');
@@ -653,6 +770,7 @@
         interventions: this.interventions.slice(),
         interventionLog: deepClone(this.interventionLog),
         checkpoints: this.checkpoints.map((cp) => ({ id: cp.id, label: cp.label, tick: cp.tick, receiptId: cp.receiptId })),
+        branchArchive: this.branchArchive.map((b) => ({ id: b.id, checkpointId: b.checkpointId, fromTick: b.fromTick, toTick: b.toTick, fingerprint: b.fingerprint, receiptCount: b.receiptCount })),
         fingerprint: this.stateFingerprint()
       };
     }

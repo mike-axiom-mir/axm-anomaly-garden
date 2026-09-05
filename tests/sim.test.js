@@ -141,4 +141,32 @@ function compact(sim) {
   assert.deepStrictEqual(compact(restored), compact(sim), 'restored RNG state must continue deterministically');
 })();
 
+(function inhabitantAuthoredTestTest() {
+  const sim = new GardenSimulation({ seed: 'self-test', repairPolicy: 'off' });
+  sim.addAnomaly('loop-echo', { x: 5, y: 4, radius: 6, intensity: 1, ttl: 80 });
+  sim.run(80);
+  assert(sim.metrics.testsRun > 0, 'investigating inhabitants should eventually run their own tests');
+  const tests = sim.receipts.filter((r) => r.type === 'inhabitant.ran-test');
+  assert(tests.length > 0, 'authored tests should produce receipts');
+  assert(tests.some((r) => r.payload.targetType === 'anomaly' || r.payload.targetType === 'modal'));
+})();
+
+(function abandonedFutureArchiveTest() {
+  const sim = new GardenSimulation({ seed: 'branch-archive', repairPolicy: 'off' });
+  sim.run(5);
+  const cp = sim.createCheckpoint('fork');
+  sim.addAnomaly('time-pocket', { x: 4, y: 4, radius: 4, intensity: 0.95, ttl: 50 });
+  sim.run(20);
+  const abandonedFingerprint = sim.stateFingerprint();
+  const receipt = sim.rewindToCheckpoint(cp.id);
+  assert(receipt, 'rewind should succeed');
+  assert.strictEqual(sim.branchArchive.length, 1, 'rewind should preserve the abandoned future');
+  assert.strictEqual(sim.branchArchive[0].fingerprint, abandonedFingerprint, 'archive should identify the exact abandoned trajectory');
+  assert(sim.branchArchive[0].state.receipts.length > cp.tick, 'archive should retain abandoned state material');
+  assert(sim.receipts.some((r) => r.type === 'system.branch-archived'));
+  const restored = GardenSimulation.deserialize(sim.serialize());
+  assert.strictEqual(restored.branchArchive.length, 1, 'branch archive must survive export/import');
+  assert.strictEqual(restored.branchArchive[0].fingerprint, abandonedFingerprint);
+})();
+
 console.log('Anomaly Garden simulation tests: PASS');

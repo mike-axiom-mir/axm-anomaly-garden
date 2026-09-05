@@ -19,6 +19,7 @@ function run(policy, seed) {
     repairs: sim.metrics.repairActions,
     modalResets: sim.metrics.modalResets,
     memoryLeaks: sim.metrics.memoryLeaks,
+    testsRun: sim.metrics.testsRun,
     receipts: sim.receipts.length
   };
 }
@@ -42,6 +43,7 @@ for (const policy of policies) {
       socialSignals: Number(average(rows, 'socialSignals').toFixed(2)),
       repairs: Number(average(rows, 'repairs').toFixed(2)),
       memoryLeaks: Number(average(rows, 'memoryLeaks').toFixed(2)),
+      testsRun: Number(average(rows, 'testsRun').toFixed(2)),
       receipts: Number(average(rows, 'receipts').toFixed(2))
     },
     modelBreakFreeRuns: rows.filter((row) => row.modelBreaks === 0).length,

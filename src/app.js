@@ -8,6 +8,7 @@
   const selectedDetail = document.getElementById('selected-detail');
   const seedInput = document.getElementById('seed');
   const repairPolicy = document.getElementById('repair-policy');
+  const scenario = document.getElementById('scenario');
   const tickLabel = document.getElementById('tick');
   const metricAwake = document.getElementById('metric-awake');
   const metricInvestigating = document.getElementById('metric-investigating');
@@ -15,6 +16,8 @@
   const metricRepairs = document.getElementById('metric-repairs');
   const metricModals = document.getElementById('metric-modals');
   const metricFingerprint = document.getElementById('metric-fingerprint');
+  const metricTests = document.getElementById('metric-tests');
+  const metricBranches = document.getElementById('metric-branches');
   const status = document.getElementById('status');
   const selectedLabel = document.getElementById('selected-agent');
   const importFile = document.getElementById('import-file');
@@ -95,7 +98,7 @@
     }
     selectedReceiptId = receipt.id;
     latestCheckpointId = sim.checkpoints.length ? sim.checkpoints[sim.checkpoints.length - 1].id : null;
-    setStatus('Rewound to ' + receipt.payload.checkpointId + '. The abandoned future is no longer canonical state; the rewind itself is receipted.');
+    setStatus('Rewound to ' + receipt.payload.checkpointId + '. The abandoned future was archived before this branch was restored; the rewind itself is receipted.');
     render();
   }
 
@@ -109,7 +112,7 @@
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    setStatus('Exported complete inspectable state, including RNG position, receipts, topology, Modals, repairs, and checkpoints.');
+    setStatus('Exported complete inspectable state, including RNG position, receipts, social topology, Modals, repairs, checkpoints, and archived futures.');
   }
 
   async function importState(file) {
@@ -132,6 +135,34 @@
     }
   }
 
+
+  function applyScenario() {
+    const choice = scenario.value;
+    stop();
+    if (choice === 'open-glitch') repairPolicy.value = 'off';
+    else if (choice === 'control-pressure') repairPolicy.value = 'aggressive';
+    else repairPolicy.value = 'tolerant';
+    newSimulation();
+    if (choice === 'open-glitch') {
+      sim.addModal({ x: 5, y: 4, radius: 3.4, period: 11, memoryLeak: 0.34 });
+      sim.addAnomaly('loop-echo', { x: 5, y: 4, radius: 3.2, intensity: 0.9, ttl: 48 });
+      setStatus('Open glitch planted: repair off, one loop anomaly, one repeating Modal. Outcomes are not scripted.');
+    } else if (choice === 'tolerant-loop') {
+      sim.addModal({ x: 5, y: 4, radius: 3.4, period: 11, memoryLeak: 0.32 });
+      sim.addAnomaly('loop-echo', { x: 5, y: 4, radius: 3.2, intensity: 0.9, ttl: 48 });
+      sim.addAnomaly('memory-scar', { x: 7, y: 3, radius: 2.6, intensity: 0.76, ttl: 38 });
+      setStatus('Tolerant loop planted: repair may respond, but weaker anomalies can persist long enough to be encountered.');
+    } else if (choice === 'control-pressure') {
+      sim.addModal({ x: 5, y: 4, radius: 3.4, period: 11, memoryLeak: 0.32 });
+      sim.addAnomaly('loop-echo', { x: 5, y: 4, radius: 3.2, intensity: 0.9, ttl: 48 });
+      sim.addAnomaly('gravity-slip', { x: 7, y: 3, radius: 2.8, intensity: 0.88, ttl: 42 });
+      setStatus('Control pressure planted: aggressive repair starts with the same sort of anomaly pressure, but outcomes remain simulation-driven.');
+    } else {
+      setStatus('Quiet garden planted. No anomaly has been added yet.');
+    }
+    render();
+  }
+
   function render() {
     renderWorld();
     renderTruth();
@@ -143,6 +174,8 @@
     metricSignals.textContent = String(sim.metrics.socialSignals);
     metricRepairs.textContent = String(sim.metrics.repairActions);
     metricModals.textContent = String(sim.metrics.modalResets);
+    metricTests.textContent = String(sim.metrics.testsRun);
+    metricBranches.textContent = String(sim.branchArchive.length);
     metricFingerprint.textContent = sim.stateFingerprint();
   }
 
@@ -212,6 +245,8 @@
       ['Modal zones', activeModals.length],
       ['Social edges', sim.relationships.length],
       ['Checkpoints', sim.checkpoints.length],
+      ['Archived futures', sim.branchArchive.length],
+      ['Inhabitant tests', sim.metrics.testsRun],
       ['Receipts', sim.receipts.length]
     ];
     for (const row of truthRows) truthList.appendChild(keyValue(row[0], row[1]));
@@ -230,6 +265,15 @@
       for (const modal of activeModals) {
         const item = document.createElement('div'); item.className = 'truth-event modal-event';
         item.textContent = modal.id + ' @ ' + modal.x + ',' + modal.y + ' · period ' + modal.period + ' · loops ' + modal.iteration + ' · anchors ' + modal.anchors.length;
+        truthList.appendChild(item);
+      }
+    }
+
+    if (sim.branchArchive.length) {
+      const subtitle = document.createElement('h4'); subtitle.textContent = 'Archived futures'; truthList.appendChild(subtitle);
+      for (const branch of sim.branchArchive.slice(-5).reverse()) {
+        const item = document.createElement('div'); item.className = 'truth-event branch-event';
+        item.textContent = branch.id + ' · abandoned t' + branch.fromTick + ' → rewind t' + branch.toTick + ' · ' + branch.fingerprint;
         truthList.appendChild(item);
       }
     }
@@ -268,6 +312,8 @@
       ['social ties', relations.length],
       ['average trust', averageTrust.toFixed(2)],
       ['modal fragments', fragments],
+      ['tests run', agent.testsRun],
+      ['test skill', agent.testSkill.toFixed(2)],
       ['recorded memories', agent.memory.length]
     ];
     for (const row of rows) selectedDetail.appendChild(keyValue(row[0], row[1]));
@@ -306,6 +352,7 @@
   }
 
   document.getElementById('reset').addEventListener('click', newSimulation);
+  document.getElementById('apply-scenario').addEventListener('click', applyScenario);
   document.getElementById('step').addEventListener('click', function () { step(1); });
   document.getElementById('step10').addEventListener('click', function () { step(10); });
   document.getElementById('run').addEventListener('click', start);

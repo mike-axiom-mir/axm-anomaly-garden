@@ -32,6 +32,19 @@
       </div>
 
       <div class="control-group">
+        <label for="scenario">Experiment preset</label>
+        <div class="inline">
+          <select id="scenario">
+            <option value="quiet">Quiet garden</option>
+            <option value="open-glitch">Open glitch</option>
+            <option value="tolerant-loop">Tolerant loop</option>
+            <option value="control-pressure">Control pressure</option>
+          </select>
+          <button id="apply-scenario">Plant</button>
+        </div>
+      </div>
+
+      <div class="control-group">
         <label>Clock</label>
         <div class="button-row">
           <button id="step">+1</button>
@@ -83,6 +96,8 @@
       <article class="metric glass"><span>social signals</span><strong id="metric-signals">0</strong></article>
       <article class="metric glass"><span>repairs</span><strong id="metric-repairs">0</strong></article>
       <article class="metric glass"><span>modal resets</span><strong id="metric-modals">0</strong></article>
+      <article class="metric glass"><span>tests run</span><strong id="metric-tests">0</strong></article>
+      <article class="metric glass"><span>archived futures</span><strong id="metric-branches">0</strong></article>
       <article class="metric glass fingerprint"><span>state fingerprint</span><strong id="metric-fingerprint">--------</strong></article>
     </section>
 

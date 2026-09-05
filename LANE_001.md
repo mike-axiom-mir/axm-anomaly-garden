@@ -14,6 +14,7 @@ Turn the empty repository into a truthful playable simulation foundation with en
 - evidence observation and missed observations
 - discrepancy accumulation/decay
 - investigation and model-break thresholds
+- investigator-authored tests against anomalies and repeating Modals
 - persistent relationship topology with trust/familiarity/signal state
 - social anomaly sharing constrained by relationship + physical proximity
 - repeating Modal zones with anchored inhabitants and configurable memory leakage
@@ -21,10 +22,12 @@ Turn the empty repository into a truthful playable simulation foundation with en
 - repair actions alter real anomaly state and emit receipts
 - append-only causal receipts on the current branch with ancestor traversal
 - full-state checkpoints and rewind
+- abandoned-future branch archive retained during rewind
 - exact RNG state capture/restoration
 - complete JSON export/import and deterministic continuation after restore
 - dual Worldglass view: inhabitant layer vs machine truth
 - offline browser interface with no runtime dependency or network requirement
+- reproducible browser experiment presets
 - command-line single-seed and 24-seed repair-policy experiments
 
 ## Deliberate non-claims
@@ -57,21 +60,21 @@ The earlier headless Chromium attempt in this environment hung before rendering 
 - Modal reset behavior currently targets position/discrepancy/memory-fragment mechanics, not a full nested subworld snapshot
 - repair programs act only on anomaly objects, not every possible inconsistent state
 - causal links cover major transitions but are not yet a complete provenance edge for every numeric state change
-- rewind intentionally discards the abandoned future from canonical simulation state; an external multiverse archive is not implemented yet
+- abandoned futures are preserved, but there is not yet a dedicated browser for opening and comparing archived branches side-by-side
 - JSON saves are complete current-state archives, not compressed long-term storage
 - UI has not yet received the real-browser visual smoke test described above
 
 ## Next useful deepening
 
 1. Add real daily-life loops: needs, schedules, locations, work/play/rest, social meetings.
-2. Add inhabitant-authored experiments so investigators can deliberately test hypotheses rather than only walk toward anomalies.
+2. Deepen inhabitant-authored experiments so investigators can repeat tests, compare results, share methods, and design stronger tests from prior evidence.
 3. Add institutions and competing narratives without giving any one institution perfect global truth.
 4. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.
-5. Add full timeline archive / branch tree so rewound futures can be inspected rather than simply dropped from canonical state.
+5. Add a branch-tree browser so archived futures can be reopened, compared, and forked without replacing canonical state.
 6. Add resource budgets and Smith-style replication experiments with locally valid but globally harmful transitions.
 7. Add richer repair-program strategies and compare suppression, tolerance, quarantine, explanation, and coexistence.
 8. Add spatial causal overlays and relationship-line visualization in Worldglass.
-9. Add scenario presets that create reproducible experimental worlds instead of one-off button sequences.
+9. Add preset batch runners and side-by-side scenario comparison so browser experiments can be repeated rather than merely planted.
 10. Add longer-run performance tests and state compression before population/world scale increases.
 
 ## Lane discipline

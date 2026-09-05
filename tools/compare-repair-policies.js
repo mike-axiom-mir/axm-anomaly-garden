@@ -23,6 +23,7 @@ function run(policy, seed) {
     repairs: sim.metrics.repairActions,
     modalResets: sim.metrics.modalResets,
     memoryLeaks: sim.metrics.memoryLeaks,
+    testsRun: sim.metrics.testsRun,
     receipts: sim.receipts.length
   };
 }

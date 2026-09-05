@@ -14,6 +14,7 @@ The current build is deliberately offline and dependency-free in the browser: op
 - 16 inhabitants with measurable curiosity, skepticism, social tendency, confidence, discrepancy, and investigation thresholds
 - state fingerprint for quick trajectory comparison
 - exact RNG state is serializable, so an imported world can continue deterministically from the saved point
+- abandoned futures created by rewind are retained in a branch archive instead of silently disappearing
 
 ### Perception and model change
 
@@ -22,6 +23,7 @@ The current build is deliberately offline and dependency-free in the browser: op
 - inhabitants can encounter, notice, or miss anomaly evidence
 - discrepancy can accumulate or decay
 - inhabitants can enter an investigation state
+- investigators can run their own anomaly/Modal tests, producing receipted confirmatory or inconclusive evidence
 - a defined threshold can produce a **model break**: `world-model-is-incomplete`
 - this is a simulation state transition, not a claim of literal awakening or self-awareness
 
@@ -54,7 +56,8 @@ The current build is deliberately offline and dependency-free in the browser: op
 - parent links for causal ancestry inspection
 - manual checkpoints
 - rewind to the latest retained checkpoint
-- rewind restores the full simulation state and RNG position, then records the rewind as a new intervention on the restored branch
+- rewind archives the abandoned future with its fingerprint and full state before restoring the checkpoint
+- the restored branch records both the archive event and the rewind intervention
 - complete JSON state export/import including topology, receipts, Modals, repair nodes, checkpoints, counters, and RNG state
 
 ### Worldglass
@@ -71,6 +74,7 @@ The interface deliberately shows two different layers:
 - Modal zones
 - relationship edge count
 - causal receipts
+- archived abandoned futures
 - deterministic state fingerprint
 
 The inhabitants do not automatically receive information merely because Worldglass shows it to the human player.
@@ -81,9 +85,9 @@ The inhabitants do not automatically receive information merely because Worldgla
 
 Inside the current ruleset, average model breaks across those runs were:
 
-- repair off: **9.75**
-- tolerant repair: **4.04**
-- aggressive repair: **0.00**
+- repair off: **9.50**
+- tolerant repair: **4.71**
+- aggressive repair: **0.08**
 
 That is a property of this simulation, not a general real-world claim. The experiment is retained so later engine changes can be compared against it rather than relying on memory or vibes.
 
@@ -114,6 +118,8 @@ The current suite checks:
 - checkpoint/rewind
 - full serialization round-trip
 - exact deterministic continuation after restoring RNG state
+- inhabitant-authored investigation tests
+- abandoned-future archive preservation across rewind and export/import
 
 ## Truth boundary
 
@@ -125,7 +131,7 @@ The project is fiction-inspired, but fiction is not evidence. Claims about real 
 
 ## Direction, not destination
 
-The Garden is meant to become a deeper causal playground rather than a scripted story recreation. Useful future layers include richer geography and daily life, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, inhabitant-created tests, and stronger causal graph analysis.
+The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography and daily life, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
 
 The guiding question remains:
 

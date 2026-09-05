@@ -25,6 +25,10 @@ The current build is deliberately offline and dependency-free in the browser: op
 - inhabitants move toward their current routine destination instead of random-walking by default
 - investigation can pull an inhabitant away from the planned routine, and that deviation is counted in state
 - energy and social need change with current activity and remain bounded state variables
+- workplaces now hold real resource stock and accumulate production from inhabitants who reach scheduled work
+- inhabitants earn/spend credits, own/consume food, and carry inspectable inventory state
+- every inhabitant carries a role-shaped multi-day project; completion creates a persistent owned artifact
+- repeated social encounters become persistent meeting events that strengthen familiarity/trust
 
 ### Perception and model change
 
@@ -95,9 +99,9 @@ The inhabitants do not automatically receive information merely because Worldgla
 
 Inside the current ruleset, average model breaks across those runs were:
 
-- repair off: **12.13**
-- tolerant repair: **5.42**
-- aggressive repair: **0.04**
+- repair off: **12.79**
+- tolerant repair: **5.67**
+- aggressive repair: **0.08**
 
 That is a property of this simulation, not a general real-world claim. The experiment is retained so later engine changes can be compared against it rather than relying on memory or vibes.
 
@@ -107,12 +111,14 @@ Run it with:
 node tools/batch-policy-study.js 24
 ```
 
+The same batch now also exposes a built-in tradeoff in the current rules: investigation overrides routine movement, so worlds with more persistent anomaly investigation spend less time on scheduled work and social meetings. `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md` records that result and explicitly separates the rule-driven direction from the seed-dependent magnitude.
+
 ## Checks
 
 With Node.js installed:
 
 ```bash
-node tests/sim.test.js
+npm test
 ```
 
 The current suite checks:
@@ -123,6 +129,7 @@ The current suite checks:
 - intervention receipts
 - world bounds
 - daily-life roles, shared places, routine destinations, activity states, and bounded needs
+- workplace production, credits, owned/consumed resources, repeated social meetings, and multi-day project completion
 - connected persistent relationship topology
 - Modal resets and deterministic memory leaks
 - repair-node behavior
@@ -142,7 +149,7 @@ The project is fiction-inspired, but fiction is not evidence. Claims about real 
 
 ## Direction, not destination
 
-The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography and daily-life tasks, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
+The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
 
 The guiding question remains:
 

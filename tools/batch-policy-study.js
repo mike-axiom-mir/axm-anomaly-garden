@@ -20,6 +20,11 @@ function run(policy, seed) {
     modalResets: sim.metrics.modalResets,
     memoryLeaks: sim.metrics.memoryLeaks,
     testsRun: sim.metrics.testsRun,
+    production: sim.metrics.production,
+    socialMeetings: sim.metrics.socialMeetings,
+    projectsCompleted: sim.metrics.projectsCompleted,
+    resourcesAcquired: sim.metrics.resourcesAcquired,
+    resourcesUsed: sim.metrics.resourcesUsed,
     receipts: sim.receipts.length
   };
 }
@@ -44,6 +49,11 @@ for (const policy of policies) {
       repairs: Number(average(rows, 'repairs').toFixed(2)),
       memoryLeaks: Number(average(rows, 'memoryLeaks').toFixed(2)),
       testsRun: Number(average(rows, 'testsRun').toFixed(2)),
+      production: Number(average(rows, 'production').toFixed(2)),
+      socialMeetings: Number(average(rows, 'socialMeetings').toFixed(2)),
+      projectsCompleted: Number(average(rows, 'projectsCompleted').toFixed(2)),
+      resourcesAcquired: Number(average(rows, 'resourcesAcquired').toFixed(2)),
+      resourcesUsed: Number(average(rows, 'resourcesUsed').toFixed(2)),
       receipts: Number(average(rows, 'receipts').toFixed(2))
     },
     modelBreakFreeRuns: rows.filter((row) => row.modelBreaks === 0).length,

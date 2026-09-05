@@ -34,20 +34,25 @@ node tools/batch-policy-study.js 24
 
 | Metric average | Repair off | Tolerant | Aggressive |
 | --- | ---: | ---: | ---: |
-| anomaly observations | 457.83 | 171.96 | 23.08 |
-| investigations | 12.29 | 5.71 | 0.13 |
-| model breaks | 12.13 | 5.42 | 0.04 |
-| social signals | 99.00 | 28.46 | 0.38 |
+| anomaly observations | 476.71 | 186.29 | 23.79 |
+| investigations | 13.00 | 6.00 | 0.21 |
+| model breaks | 12.79 | 5.67 | 0.08 |
+| social signals | 116.71 | 37.04 | 1.79 |
 | repair actions | 0.00 | 10.00 | 8.00 |
-| modal memory leaks | 14.29 | 14.17 | 14.00 |
-| inhabitant-authored tests | 66.88 | 33.46 | 0.79 |
-| causal receipts | 669.29 | 277.04 | 58.38 |
+| modal memory leaks | 13.92 | 13.21 | 13.63 |
+| inhabitant-authored tests | 70.42 | 35.17 | 1.42 |
+| workplace production | 13.17 | 16.29 | 18.62 |
+| social meetings | 6.92 | 11.38 | 19.21 |
+| projects completed | 0.50 | 1.25 | 1.46 |
+| resources acquired | 13.04 | 14.63 | 15.13 |
+| resources used | 23.92 | 25.38 | 25.50 |
+| causal receipts | 753.83 | 353.79 | 122.17 |
 
 Additional counts across 24 runs:
 
 - repair off: 0/24 runs without model breaks; 0/24 without investigations
 - tolerant repair: 0/24 runs without model breaks; 0/24 without investigations
-- aggressive repair: 23/24 runs without model breaks; 21/24 without investigations
+- aggressive repair: 22/24 runs without model breaks; 20/24 without investigations
 
 ## What this result does support
 
@@ -74,4 +79,4 @@ It is a useful regression target. Future changes to repair programs, perception,
 
 ## Revision note
 
-The table above was rerun again after v0.4 replaced default random walking with shared daily routines, workplaces, and social destinations. This changed encounter clustering and therefore the measured cascade. The v0.3 and v0.2 measurements remain in Git history; the current document always reports the current engine rather than freezing a prettier past result.
+The table above was rerun again after v0.5 added productive work, hunger, credits, owned/consumed resources, repeated social meetings, and long-running personal projects. Those additions changed random-consumption order and routine state, so the measured cascade changed again. The v0.4, v0.3, and v0.2 measurements remain in Git history; the current document always reports the current engine rather than freezing a prettier past result.

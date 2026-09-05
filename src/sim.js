@@ -51,7 +51,10 @@
     repairStep: 0.18,
     repairCooldown: 3,
     testCooldown: 6,
-    dayLength: 48
+    dayLength: 48,
+    projectWorkStep: 0.032,
+    hungerRate: 0.012,
+    resourcePrice: 1
   });
 
   function makeId(prefix, n) {
@@ -61,7 +64,7 @@
   class GardenSimulation {
     constructor(options) {
       const opts = options || {};
-      this.version = '0.4.0';
+      this.version = '0.5.0';
       this.config = Object.assign({}, DEFAULT_CONFIG, opts.config || {});
       this.seedText = String(opts.seed || 'rabbit-001');
       this.seed = hashSeed(this.seedText);
@@ -95,7 +98,12 @@
         memoryLeaks: 0,
         rewinds: 0,
         testsRun: 0,
-        archivedBranches: 0
+        archivedBranches: 0,
+        production: 0,
+        socialMeetings: 0,
+        projectsCompleted: 0,
+        resourcesAcquired: 0,
+        resourcesUsed: 0
       };
       this._createPlaces();
       this._createAgents();
@@ -114,13 +122,13 @@
 
     _createPlaces() {
       const specs = [
-        ['workshop', 'work', 'Workshop', 3, 2],
-        ['observatory', 'work', 'Observatory', 8, 1],
-        ['market', 'work-social', 'Market', 9, 4],
-        ['repair-depot', 'work', 'Repair Depot', 2, 6],
-        ['station', 'work-social', 'Station', 6, 6],
-        ['cafe', 'social', 'Cafe', 5, 4],
-        ['park', 'social', 'Park', 10, 7]
+        ['workshop', 'work', 'Workshop', 3, 2, 'material', 2],
+        ['observatory', 'work', 'Observatory', 8, 1, 'insight', 1],
+        ['market', 'work-social', 'Market', 9, 4, 'food', 6],
+        ['repair-depot', 'work', 'Repair Depot', 2, 6, 'parts', 2],
+        ['station', 'work-social', 'Station', 6, 6, 'service', 1],
+        ['cafe', 'social', 'Cafe', 5, 4, 'food', 5],
+        ['park', 'social', 'Park', 10, 7, 'food', 1]
       ];
       this.places = specs.map((spec, index) => ({
         id: 'place-' + spec[0],
@@ -128,6 +136,10 @@
         name: spec[2],
         x: clamp(spec[3], 0, this.config.width - 1),
         y: clamp(spec[4], 0, this.config.height - 1),
+        resource: spec[5],
+        stock: Number(spec[6] || 0),
+        produced: 0,
+        consumed: 0,
         index
       }));
     }
@@ -142,6 +154,14 @@
         gardener: 'place-park'
       };
       const socialPlaces = ['place-cafe', 'place-park', 'place-market', 'place-station'];
+      const projectByRole = {
+        maker: 'build-device',
+        maintainer: 'restore-system',
+        analyst: 'map-patterns',
+        clerk: 'community-ledger',
+        courier: 'route-atlas',
+        gardener: 'seed-archive'
+      };
       for (let i = 0; i < this.config.population; i += 1) {
         const x = Math.floor(this.random() * this.config.width);
         const y = Math.floor(this.random() * this.config.height);
@@ -162,6 +182,13 @@
           lastDeviationReceipt: null,
           energy: round(0.72 + this.random() * 0.24),
           socialNeed: round(0.18 + this.random() * 0.44),
+          hunger: round(0.16 + this.random() * 0.3),
+          credits: round(2 + this.random() * 4, 2),
+          inventory: { food: 1, material: 0, parts: 0, insight: 0, service: 0 },
+          ownedArtifacts: [],
+          workSkill: round(0.28 + this.random() * 0.66),
+          project: { kind: projectByRole[role], progress: 0, completions: 0 },
+          lastPurchaseTick: -999,
           curiosity: round(0.18 + this.random() * 0.78),
           skepticism: round(0.18 + this.random() * 0.68),
           social: round(0.2 + this.random() * 0.7),
@@ -195,7 +222,9 @@
           b: ids[1],
           trust: round(forced ? 0.42 + this.random() * 0.2 : 0.22 + this.random() * 0.58),
           familiarity: round(0.25 + this.random() * 0.65),
-          signals: 0
+          signals: 0,
+          meetings: 0,
+          lastMeetingTick: -999
         });
       };
       for (let i = 0; i < this.agents.length; i += 1) {
@@ -425,6 +454,101 @@
       } else {
         agent.energy = clamp(agent.energy - 0.012, 0, 1);
         agent.socialNeed = clamp(agent.socialNeed + 0.008, 0, 1);
+      }
+    }
+
+    _processWorkAndOwnership(agent) {
+      agent.hunger = clamp(agent.hunger + this.config.hungerRate + (agent.currentActivity === 'work' ? 0.004 : 0), 0, 1);
+
+      const location = this.places.find((place) => place.x === agent.x && place.y === agent.y) || null;
+      const workplace = this._placeById(agent.workplaceId);
+      if (agent.currentActivity === 'work' && workplace && agent.x === workplace.x && agent.y === workplace.y) {
+        const amount = round(0.03 + agent.workSkill * 0.045, 4);
+        workplace.stock = round(workplace.stock + amount, 4);
+        workplace.produced = round(workplace.produced + amount, 4);
+        agent.credits = round(agent.credits + amount * 0.28, 2);
+        this.metrics.production = round(this.metrics.production + amount, 4);
+        agent.project.progress = round(agent.project.progress + this.config.projectWorkStep * (0.65 + agent.workSkill * 0.55), 4);
+        if (agent.project.progress >= 1) {
+          agent.project.progress = round(agent.project.progress - 1, 4);
+          agent.project.completions += 1;
+          const artifact = {
+            id: agent.id + '-artifact-' + String(agent.project.completions).padStart(3, '0'),
+            kind: agent.project.kind,
+            completedAt: this.tick
+          };
+          agent.ownedArtifacts.push(artifact);
+          this.metrics.projectsCompleted += 1;
+          const parent = agent.memory.length ? agent.memory[agent.memory.length - 1].receiptId : null;
+          const receipt = this._receipt('inhabitant.completed-project', {
+            agentId: agent.id,
+            role: agent.role,
+            projectKind: agent.project.kind,
+            artifactId: artifact.id,
+            completionNumber: agent.project.completions
+          }, parent ? [parent] : []);
+          this._remember(agent, receipt.id, 'I finished a long-running personal project.');
+        }
+      }
+
+      if (location && location.resource === 'food' && agent.hunger >= 0.42 && location.stock >= 1 && agent.credits >= this.config.resourcePrice && this.tick - agent.lastPurchaseTick >= 4) {
+        location.stock = round(location.stock - 1, 4);
+        location.consumed = round(location.consumed + 1, 4);
+        agent.credits = round(agent.credits - this.config.resourcePrice, 2);
+        agent.inventory.food += 1;
+        agent.lastPurchaseTick = this.tick;
+        this.metrics.resourcesAcquired += 1;
+        this._receipt('inhabitant.acquired-resource', {
+          agentId: agent.id,
+          placeId: location.id,
+          resource: 'food',
+          quantity: 1,
+          creditsAfter: agent.credits
+        });
+      }
+
+      if (agent.hunger >= 0.58 && agent.inventory.food > 0) {
+        agent.inventory.food -= 1;
+        const before = agent.hunger;
+        agent.hunger = clamp(agent.hunger - 0.48, 0, 1);
+        this.metrics.resourcesUsed += 1;
+        this._receipt('inhabitant.used-resource', {
+          agentId: agent.id,
+          resource: 'food',
+          hungerBefore: round(before),
+          hungerAfter: round(agent.hunger),
+          foodRemaining: agent.inventory.food
+        });
+      }
+    }
+
+    _processSocialMeetings() {
+      for (const relation of this.relationships) {
+        const a = this.agents.find((item) => item.id === relation.a);
+        const b = this.agents.find((item) => item.id === relation.b);
+        if (!a || !b) continue;
+        const together = a.currentActivity === 'social' && b.currentActivity === 'social' && a.x === b.x && a.y === b.y;
+        if (!together) continue;
+        if (relation.lastMeetingTick === this.tick - 1) {
+          relation.lastMeetingTick = this.tick;
+          continue;
+        }
+        relation.lastMeetingTick = this.tick;
+        relation.meetings += 1;
+        relation.familiarity = clamp(relation.familiarity + 0.025, 0, 1);
+        relation.trust = clamp(relation.trust + 0.006, 0, 1);
+        a.socialNeed = clamp(a.socialNeed - 0.08, 0, 1);
+        b.socialNeed = clamp(b.socialNeed - 0.08, 0, 1);
+        this.metrics.socialMeetings += 1;
+        this._receipt('inhabitant.social-meeting', {
+          relationId: relation.id,
+          a: a.id,
+          b: b.id,
+          meetingNumber: relation.meetings,
+          location: { x: a.x, y: a.y },
+          trust: round(relation.trust),
+          familiarity: round(relation.familiarity)
+        });
       }
     }
 
@@ -748,11 +872,13 @@
       for (const agent of this.agents) {
         this._updateRoutine(agent);
         this._move(agent);
+        this._processWorkAndOwnership(agent);
         this._observe(agent);
         this._updateBelief(agent);
         this._maybeRunInvestigationTest(agent);
         this._updateBelief(agent);
       }
+      this._processSocialMeetings();
       this._socialExchange();
       for (const agent of this.agents) this._updateBelief(agent);
       return this.snapshot();
@@ -800,7 +926,7 @@
 
     _restoreState(state) {
       const s = deepClone(state);
-      this.version = s.version || '0.4.0';
+      this.version = s.version || '0.5.0';
       this.seedText = s.seedText;
       this.seed = s.seed;
       this.config = Object.assign({}, DEFAULT_CONFIG, s.config || {});
@@ -818,7 +944,7 @@
       this.receipts = s.receipts || [];
       this.interventions = s.interventions || [];
       this.interventionLog = s.interventionLog || [];
-      this.metrics = Object.assign({ observations: 0, investigations: 0, socialSignals: 0, thresholdCrossings: 0, awakenings: 0, repairActions: 0, modalResets: 0, memoryLeaks: 0, rewinds: 0, testsRun: 0, archivedBranches: 0 }, s.metrics || {});
+      this.metrics = Object.assign({ observations: 0, investigations: 0, socialSignals: 0, thresholdCrossings: 0, awakenings: 0, repairActions: 0, modalResets: 0, memoryLeaks: 0, rewinds: 0, testsRun: 0, archivedBranches: 0, production: 0, socialMeetings: 0, projectsCompleted: 0, resourcesAcquired: 0, resourcesUsed: 0 }, s.metrics || {});
       this.nextReceiptId = s.counters ? s.counters.nextReceiptId : this.receipts.length + 1;
       this.nextAnomalyId = s.counters ? s.counters.nextAnomalyId : this.anomalies.length + 1;
       this.nextModalId = s.counters ? s.counters.nextModalId : this.modalZones.length + 1;
@@ -845,11 +971,11 @@
         seed: this.seed,
         rng: this.random.getState(),
         repairPolicy: this.repairPolicy,
-        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.energy), round(a.socialNeed), a.currentActivity, a.plannedActivity, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length, a.testsRun, a.routineDeviations]),
-        places: this.places.map((p) => [p.id, p.x, p.y, p.type]),
+        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.energy), round(a.socialNeed), round(a.hunger), round(a.credits, 2), a.inventory.food, a.ownedArtifacts.length, a.project.kind, round(a.project.progress), a.project.completions, a.currentActivity, a.plannedActivity, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length, a.testsRun, a.routineDeviations]),
+        places: this.places.map((p) => [p.id, p.x, p.y, p.type, p.resource, round(p.stock, 4), round(p.produced, 4), round(p.consumed, 4)]),
         anomalies: this.anomalies.map((a) => [a.id, a.kind, a.x, a.y, round(a.intensity), a.ttl, a.active]),
         modals: this.modalZones.map((z) => [z.id, z.iteration, z.active]),
-        relationships: this.relationships.map((r) => [r.id, round(r.trust), round(r.familiarity), r.signals]),
+        relationships: this.relationships.map((r) => [r.id, round(r.trust), round(r.familiarity), r.signals, r.meetings]),
         repairNodes: this.repairNodes.map((n) => [n.id, n.x, n.y, n.actions]),
         archivedBranches: this.branchArchive.map((b) => [b.id, b.fromTick, b.toTick, b.fingerprint]),
         receipts: this.receipts.length

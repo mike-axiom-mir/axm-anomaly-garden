@@ -24,6 +24,11 @@ function run(policy, seed) {
     modalResets: sim.metrics.modalResets,
     memoryLeaks: sim.metrics.memoryLeaks,
     testsRun: sim.metrics.testsRun,
+    production: sim.metrics.production,
+    socialMeetings: sim.metrics.socialMeetings,
+    projectsCompleted: sim.metrics.projectsCompleted,
+    resourcesAcquired: sim.metrics.resourcesAcquired,
+    resourcesUsed: sim.metrics.resourcesUsed,
     receipts: sim.receipts.length
   };
 }

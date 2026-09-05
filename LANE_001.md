@@ -10,7 +10,8 @@ Turn the empty repository into a truthful playable simulation foundation with en
 
 - deterministic seeded world and state fingerprint
 - 16 inhabitants with independent measurable internal variables
-- persistent homes, roles, shared workplaces/social places, 48-tick day cycle, planned activity, energy, and social need
+- persistent homes, roles, shared workplaces/social places, 48-tick day cycle, planned activity, energy, social need, and hunger
+- workplace production and stock, personal credits/inventory, resource acquisition/use, repeated social meetings, and role-shaped multi-day projects that create owned artifacts
 - routine-following movement with investigation-driven deviation from planned life
 - local anomaly injection and targeted whisper intervention
 - evidence observation and missed observations
@@ -39,7 +40,7 @@ No sentience, consciousness, genuine belief, genuine curiosity, literal awakenin
 ## Verification performed
 
 ```bash
-node tests/sim.test.js
+npm test
 node --check src/sim.js
 node --check src/app.js
 node tools/compare-repair-policies.js
@@ -48,7 +49,7 @@ node tools/batch-policy-study.js 24
 
 Current deterministic test suite: **PASS**.
 
-The 24-seed study is recorded in `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` with explicit scope limits.
+The 24-seed study is recorded in `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` with explicit scope limits. Productive-life tradeoff and 2,000-tick scaling notes are recorded separately under `EXPERIMENTS/`.
 
 ## Browser truth boundary
 
@@ -57,7 +58,7 @@ The earlier headless Chromium attempt in this environment hung before rendering 
 ## Known limitations
 
 - geography remains a compact grid rather than a full lived city/world
-- basic schedules, roles, workplaces, energy, and social need now exist, but work has no production/economy, social life has no families, and there are no inventories or long-term projects yet
+- schedules, roles, workplace production, credits, inventories, repeated meetings, and multi-day projects now exist, but the economy is deliberately tiny: no prices beyond one food resource, no trade network, no firms, no families, and no inheritance yet
 - social topology is persistent but still simple
 - Modal reset behavior currently targets position/discrepancy/memory-fragment mechanics, not a full nested subworld snapshot
 - repair programs act only on anomaly objects, not every possible inconsistent state
@@ -68,7 +69,7 @@ The earlier headless Chromium attempt in this environment hung before rendering 
 
 ## Next useful deepening
 
-1. Deepen daily life from routing into actual tasks, production, leisure choices, repeated social meetings, ownership, and long-term projects.
+1. Deepen the new productive-life layer into multiple task types, richer resource chains, leisure choices, trade, ownership transfer, and projects that can alter the shared world.
 2. Deepen inhabitant-authored experiments so investigators can repeat tests, compare results, share methods, and design stronger tests from prior evidence.
 3. Add institutions and competing narratives without giving any one institution perfect global truth.
 4. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.

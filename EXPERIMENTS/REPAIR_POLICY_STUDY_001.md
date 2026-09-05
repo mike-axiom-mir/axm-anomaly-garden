@@ -34,20 +34,20 @@ node tools/batch-policy-study.js 24
 
 | Metric average | Repair off | Tolerant | Aggressive |
 | --- | ---: | ---: | ---: |
-| anomaly observations | 367.00 | 144.58 | 22.04 |
-| investigations | 9.71 | 4.83 | 0.17 |
-| model breaks | 9.50 | 4.71 | 0.08 |
-| social signals | 64.46 | 25.17 | 0.42 |
+| anomaly observations | 457.83 | 171.96 | 23.08 |
+| investigations | 12.29 | 5.71 | 0.13 |
+| model breaks | 12.13 | 5.42 | 0.04 |
+| social signals | 99.00 | 28.46 | 0.38 |
 | repair actions | 0.00 | 10.00 | 8.00 |
-| modal memory leaks | 14.17 | 15.88 | 14.21 |
-| inhabitant-authored tests | 53.46 | 30.13 | 1.50 |
-| causal receipts | 526.29 | 241.00 | 57.96 |
+| modal memory leaks | 14.29 | 14.17 | 14.00 |
+| inhabitant-authored tests | 66.88 | 33.46 | 0.79 |
+| causal receipts | 669.29 | 277.04 | 58.38 |
 
 Additional counts across 24 runs:
 
 - repair off: 0/24 runs without model breaks; 0/24 without investigations
 - tolerant repair: 0/24 runs without model breaks; 0/24 without investigations
-- aggressive repair: 22/24 runs without model breaks; 20/24 without investigations
+- aggressive repair: 23/24 runs without model breaks; 21/24 without investigations
 
 ## What this result does support
 
@@ -72,7 +72,6 @@ Those would require different evidence entirely.
 
 It is a useful regression target. Future changes to repair programs, perception, social topology, memory, or Modal behavior can rerun this study and show whether the causal character of the garden changed.
 
-
 ## Revision note
 
-The table above was rerun after v0.3 added inhabitant-authored tests. The earlier v0.2 measurements were intentionally replaced rather than preserved as if the engine had not changed. Git history retains the earlier result if comparison is needed.
+The table above was rerun again after v0.4 replaced default random walking with shared daily routines, workplaces, and social destinations. This changed encounter clustering and therefore the measured cascade. The v0.3 and v0.2 measurements remain in Git history; the current document always reports the current engine rather than freezing a prettier past result.

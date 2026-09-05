@@ -15,6 +15,16 @@ The current build is deliberately offline and dependency-free in the browser: op
 - state fingerprint for quick trajectory comparison
 - exact RNG state is serializable, so an imported world can continue deterministically from the saved point
 - abandoned futures created by rewind are retained in a branch archive instead of silently disappearing
+- a 48-tick day cycle gives inhabitants persistent homes, roles, workplaces, social destinations, energy, social need, and planned activities
+
+### Lived routine layer
+
+- each inhabitant has a persistent home and role
+- roles map to shared workplaces such as the Workshop, Observatory, Market, Repair Depot, Station, and Park
+- every day cycles through rest, work, social, and home phases
+- inhabitants move toward their current routine destination instead of random-walking by default
+- investigation can pull an inhabitant away from the planned routine, and that deviation is counted in state
+- energy and social need change with current activity and remain bounded state variables
 
 ### Perception and model change
 
@@ -85,9 +95,9 @@ The inhabitants do not automatically receive information merely because Worldgla
 
 Inside the current ruleset, average model breaks across those runs were:
 
-- repair off: **9.50**
-- tolerant repair: **4.71**
-- aggressive repair: **0.08**
+- repair off: **12.13**
+- tolerant repair: **5.42**
+- aggressive repair: **0.04**
 
 That is a property of this simulation, not a general real-world claim. The experiment is retained so later engine changes can be compared against it rather than relying on memory or vibes.
 
@@ -112,6 +122,7 @@ The current suite checks:
 - causal parent links
 - intervention receipts
 - world bounds
+- daily-life roles, shared places, routine destinations, activity states, and bounded needs
 - connected persistent relationship topology
 - Modal resets and deterministic memory leaks
 - repair-node behavior
@@ -131,7 +142,7 @@ The project is fiction-inspired, but fiction is not evidence. Claims about real 
 
 ## Direction, not destination
 
-The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography and daily life, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
+The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography and daily-life tasks, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
 
 The guiding question remains:
 

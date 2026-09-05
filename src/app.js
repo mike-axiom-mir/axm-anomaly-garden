@@ -10,6 +10,7 @@
   const repairPolicy = document.getElementById('repair-policy');
   const scenario = document.getElementById('scenario');
   const tickLabel = document.getElementById('tick');
+  const metricDay = document.getElementById('metric-day');
   const metricAwake = document.getElementById('metric-awake');
   const metricInvestigating = document.getElementById('metric-investigating');
   const metricSignals = document.getElementById('metric-signals');
@@ -169,6 +170,7 @@
     renderPeople();
     renderCausal();
     tickLabel.textContent = String(sim.tick);
+    metricDay.textContent = String(Math.floor(sim.tick / sim.config.dayLength) + 1);
     metricAwake.textContent = String(sim.metrics.awakenings);
     metricInvestigating.textContent = String(sim.agents.filter(function (a) { return a.investigating && !a.awakened; }).length);
     metricSignals.textContent = String(sim.metrics.socialSignals);
@@ -189,6 +191,15 @@
         cell.className = 'cell';
         world.appendChild(cell);
       }
+    }
+    for (const place of sim.places) {
+      const marker = document.createElement('div');
+      marker.className = 'place-marker ' + place.type.replace(/[^a-z0-9_-]/gi, '-');
+      marker.style.gridColumn = place.x + 1;
+      marker.style.gridRow = place.y + 1;
+      marker.title = place.name + ' · ' + place.type;
+      marker.textContent = place.name.slice(0, 1).toUpperCase();
+      world.appendChild(marker);
     }
     for (const modal of sim.modalZones.filter(function (z) { return z.active; })) {
       const marker = document.createElement('div');
@@ -238,11 +249,13 @@
     const truthRows = [
       ['Seed', sim.seedText + ' / ' + sim.seed],
       ['World tick', sim.tick],
+      ['World day', Math.floor(sim.tick / sim.config.dayLength) + 1],
       ['Fingerprint', sim.stateFingerprint()],
       ['Active anomalies', active.length],
       ['Repair policy', sim.repairPolicy],
       ['Repair programs', sim.repairNodes.length],
       ['Modal zones', activeModals.length],
+      ['Shared places', sim.places.length],
       ['Social edges', sim.relationships.length],
       ['Checkpoints', sim.checkpoints.length],
       ['Archived futures', sim.branchArchive.length],
@@ -305,7 +318,17 @@
     const relations = sim.relationships.filter(function (r) { return r.a === agent.id || r.b === agent.id; });
     const averageTrust = relations.length ? relations.reduce(function (sum, r) { return sum + r.trust; }, 0) / relations.length : 0;
     const fragments = Object.values(agent.modalMemory || {}).reduce(function (sum, value) { return sum + value; }, 0);
+    const workplace = sim.places.find(function (place) { return place.id === agent.workplaceId; });
+    const socialPlace = sim.places.find(function (place) { return place.id === agent.socialPlaceId; });
     const rows = [
+      ['role', agent.role],
+      ['activity', agent.currentActivity],
+      ['planned', agent.plannedActivity],
+      ['workplace', workplace ? workplace.name : agent.workplaceId],
+      ['social place', socialPlace ? socialPlace.name : agent.socialPlaceId],
+      ['energy', agent.energy.toFixed(2)],
+      ['social need', agent.socialNeed.toFixed(2)],
+      ['routine deviations', agent.routineDeviations],
       ['hypothesis', agent.hypothesis],
       ['confidence', agent.confidence.toFixed(2)],
       ['discrepancy', agent.discrepancy.toFixed(2)],

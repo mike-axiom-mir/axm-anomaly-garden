@@ -8,13 +8,17 @@ function compact(sim) {
     tick: sim.tick,
     metrics: sim.metrics,
     agents: sim.agents.map((a) => ({
-      id: a.id, x: a.x, y: a.y, discrepancy: a.discrepancy, confidence: a.confidence,
-      hypothesis: a.hypothesis, investigating: a.investigating, awakened: a.awakened,
-      memory: a.memory, modalMemory: a.modalMemory
+      id: a.id, x: a.x, y: a.y, home: a.home, role: a.role, workplaceId: a.workplaceId, socialPlaceId: a.socialPlaceId,
+      currentActivity: a.currentActivity, plannedActivity: a.plannedActivity, routineTarget: a.routineTarget,
+      routineDeviations: a.routineDeviations, energy: a.energy, socialNeed: a.socialNeed,
+      discrepancy: a.discrepancy, confidence: a.confidence, hypothesis: a.hypothesis,
+      investigating: a.investigating, awakened: a.awakened, memory: a.memory, modalMemory: a.modalMemory,
+      testsRun: a.testsRun, testSkill: a.testSkill
     })),
     anomalies: sim.anomalies,
     modals: sim.modalZones,
     relationships: sim.relationships,
+    places: sim.places,
     repairNodes: sim.repairNodes,
     repairPolicy: sim.repairPolicy,
     receipts: sim.receipts,
@@ -167,6 +171,25 @@ function compact(sim) {
   const restored = GardenSimulation.deserialize(sim.serialize());
   assert.strictEqual(restored.branchArchive.length, 1, 'branch archive must survive export/import');
   assert.strictEqual(restored.branchArchive[0].fingerprint, abandonedFingerprint);
+})();
+
+(function dailyLifeRoutineTest() {
+  const sim = new GardenSimulation({ seed: 'daily-life', repairPolicy: 'off' });
+  assert(sim.places.length >= 6, 'world should expose stable routine destinations');
+  const placeIds = new Set(sim.places.map((place) => place.id));
+  for (const agent of sim.agents) {
+    assert(placeIds.has(agent.workplaceId), 'every inhabitant should have a real workplace');
+    assert(placeIds.has(agent.socialPlaceId), 'every inhabitant should have a real social destination');
+    assert(agent.home && Number.isInteger(agent.home.x) && Number.isInteger(agent.home.y));
+  }
+  sim.run(sim.config.dayLength * 2 + 5);
+  const allowed = new Set(['rest', 'work', 'social', 'home', 'investigate']);
+  for (const agent of sim.agents) {
+    assert(allowed.has(agent.currentActivity));
+    assert(agent.energy >= 0 && agent.energy <= 1);
+    assert(agent.socialNeed >= 0 && agent.socialNeed <= 1);
+    assert(agent.routineTarget && Number.isInteger(agent.routineTarget.x) && Number.isInteger(agent.routineTarget.y));
+  }
 })();
 
 console.log('Anomaly Garden simulation tests: PASS');

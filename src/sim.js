@@ -33,6 +33,7 @@
   const round = (value, digits) => Number(value.toFixed(digits == null ? 3 : digits));
   const deepClone = (value) => JSON.parse(JSON.stringify(value));
   const FIRST_NAMES = ['Ada', 'Miro', 'June', 'Sol', 'Iris', 'Niko', 'Tess', 'Rune', 'Pax', 'Lio', 'Mara', 'Noa', 'Orin', 'Vera', 'Kian', 'Eli'];
+  const ROLES = ['maker', 'maintainer', 'analyst', 'clerk', 'courier', 'gardener'];
 
   const DEFAULT_CONFIG = Object.freeze({
     width: 12,
@@ -49,7 +50,8 @@
     repairRadius: 1.6,
     repairStep: 0.18,
     repairCooldown: 3,
-    testCooldown: 6
+    testCooldown: 6,
+    dayLength: 48
   });
 
   function makeId(prefix, n) {
@@ -59,7 +61,7 @@
   class GardenSimulation {
     constructor(options) {
       const opts = options || {};
-      this.version = '0.3.0';
+      this.version = '0.4.0';
       this.config = Object.assign({}, DEFAULT_CONFIG, opts.config || {});
       this.seedText = String(opts.seed || 'rabbit-001');
       this.seed = hashSeed(this.seedText);
@@ -71,6 +73,7 @@
       this.anomalies = [];
       this.modalZones = [];
       this.relationships = [];
+      this.places = [];
       this.repairNodes = [];
       this.checkpoints = [];
       this.branchArchive = [];
@@ -94,6 +97,7 @@
         testsRun: 0,
         archivedBranches: 0
       };
+      this._createPlaces();
       this._createAgents();
       this._createRelationships();
       this._createRepairNodes();
@@ -103,17 +107,61 @@
         population: this.agents.length,
         dimensions: [this.config.width, this.config.height],
         relationshipEdges: this.relationships.length,
-        repairNodes: this.repairNodes.length
+        repairNodes: this.repairNodes.length,
+        places: this.places.length
       });
     }
 
+    _createPlaces() {
+      const specs = [
+        ['workshop', 'work', 'Workshop', 3, 2],
+        ['observatory', 'work', 'Observatory', 8, 1],
+        ['market', 'work-social', 'Market', 9, 4],
+        ['repair-depot', 'work', 'Repair Depot', 2, 6],
+        ['station', 'work-social', 'Station', 6, 6],
+        ['cafe', 'social', 'Cafe', 5, 4],
+        ['park', 'social', 'Park', 10, 7]
+      ];
+      this.places = specs.map((spec, index) => ({
+        id: 'place-' + spec[0],
+        type: spec[1],
+        name: spec[2],
+        x: clamp(spec[3], 0, this.config.width - 1),
+        y: clamp(spec[4], 0, this.config.height - 1),
+        index
+      }));
+    }
+
     _createAgents() {
+      const workByRole = {
+        maker: 'place-workshop',
+        maintainer: 'place-repair-depot',
+        analyst: 'place-observatory',
+        clerk: 'place-market',
+        courier: 'place-station',
+        gardener: 'place-park'
+      };
+      const socialPlaces = ['place-cafe', 'place-park', 'place-market', 'place-station'];
       for (let i = 0; i < this.config.population; i += 1) {
+        const x = Math.floor(this.random() * this.config.width);
+        const y = Math.floor(this.random() * this.config.height);
+        const role = ROLES[Math.floor(this.random() * ROLES.length)];
         this.agents.push({
           id: makeId('inhabitant', i + 1),
           name: FIRST_NAMES[i % FIRST_NAMES.length],
-          x: Math.floor(this.random() * this.config.width),
-          y: Math.floor(this.random() * this.config.height),
+          x,
+          y,
+          home: { x, y },
+          role,
+          workplaceId: workByRole[role],
+          socialPlaceId: socialPlaces[Math.floor(this.random() * socialPlaces.length)],
+          currentActivity: 'home',
+          plannedActivity: 'home',
+          routineTarget: { x, y },
+          routineDeviations: 0,
+          lastDeviationReceipt: null,
+          energy: round(0.72 + this.random() * 0.24),
+          socialNeed: round(0.18 + this.random() * 0.44),
           curiosity: round(0.18 + this.random() * 0.78),
           skepticism: round(0.18 + this.random() * 0.68),
           social: round(0.2 + this.random() * 0.7),
@@ -344,18 +392,66 @@
       entity.y = clamp(entity.y + dy, 0, this.config.height - 1);
     }
 
+    _placeById(id) {
+      return this.places.find((place) => place.id === id) || null;
+    }
+
+    _plannedRoutine(agent) {
+      const localTick = this.tick % this.config.dayLength;
+      if (localTick < 10) return { activity: 'rest', target: agent.home };
+      if (localTick < 29) return { activity: 'work', target: this._placeById(agent.workplaceId) || agent.home };
+      if (localTick < 38) return { activity: 'social', target: this._placeById(agent.socialPlaceId) || agent.home };
+      return { activity: 'home', target: agent.home };
+    }
+
+    _updateRoutine(agent) {
+      const planned = this._plannedRoutine(agent);
+      agent.plannedActivity = planned.activity;
+      agent.routineTarget = { x: planned.target.x, y: planned.target.y };
+      const live = this.anomalies.filter((a) => a.active).sort((a, b) => this._distance(agent, a) - this._distance(agent, b));
+      const fragments = Object.values(agent.modalMemory || {}).reduce((sum, value) => sum + value, 0);
+      const canInvestigate = agent.investigating && (live.length || fragments > 0);
+      agent.currentActivity = canInvestigate ? 'investigate' : planned.activity;
+
+      if (agent.currentActivity === 'rest' || agent.currentActivity === 'home') {
+        agent.energy = clamp(agent.energy + 0.026, 0, 1);
+        agent.socialNeed = clamp(agent.socialNeed + 0.004, 0, 1);
+      } else if (agent.currentActivity === 'social') {
+        agent.energy = clamp(agent.energy - 0.008, 0, 1);
+        agent.socialNeed = clamp(agent.socialNeed - 0.038, 0, 1);
+      } else if (agent.currentActivity === 'investigate') {
+        agent.energy = clamp(agent.energy - 0.019, 0, 1);
+        agent.socialNeed = clamp(agent.socialNeed + 0.006, 0, 1);
+      } else {
+        agent.energy = clamp(agent.energy - 0.012, 0, 1);
+        agent.socialNeed = clamp(agent.socialNeed + 0.008, 0, 1);
+      }
+    }
+
     _move(agent) {
       const directions = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
-      let choice = directions[Math.floor(this.random() * directions.length)];
-      if (agent.investigating) {
+      if (agent.currentActivity === 'investigate') {
         const live = this.anomalies.filter((a) => a.active).sort((a, b) => this._distance(agent, a) - this._distance(agent, b));
         if (live.length) {
           this._moveToward(agent, live[0]);
           return;
         }
+        const rememberedModal = this.modalZones
+          .filter((z) => z.active && (agent.modalMemory[z.id] || 0) > 0)
+          .sort((a, b) => this._distance(agent, a) - this._distance(agent, b))[0];
+        if (rememberedModal) {
+          this._moveToward(agent, rememberedModal);
+          return;
+        }
       }
-      agent.x = clamp(agent.x + choice[0], 0, this.config.width - 1);
-      agent.y = clamp(agent.y + choice[1], 0, this.config.height - 1);
+      const target = agent.routineTarget || agent.home;
+      if (this._distance(agent, target) > 0.1) {
+        this._moveToward(agent, target);
+      } else if (this.random() < 0.18) {
+        const choice = directions[Math.floor(this.random() * directions.length)];
+        agent.x = clamp(agent.x + choice[0], 0, this.config.width - 1);
+        agent.y = clamp(agent.y + choice[1], 0, this.config.height - 1);
+      }
     }
 
     _observe(agent) {
@@ -418,12 +514,16 @@
         agent.hypothesis = 'something-is-inconsistent';
         this.metrics.thresholdCrossings += 1;
         this.metrics.investigations += 1;
+        agent.routineDeviations += 1;
         const parent = agent.memory.length ? agent.memory[agent.memory.length - 1].receiptId : null;
         const receipt = this._receipt('inhabitant.started-investigation', {
           agentId: agent.id,
           score: round(score),
-          threshold: agent.threshold
+          threshold: agent.threshold,
+          plannedActivity: agent.plannedActivity,
+          routineDeviations: agent.routineDeviations
         }, parent ? [parent] : []);
+        agent.lastDeviationReceipt = receipt.id;
         this._remember(agent, receipt.id, 'I should test whether this is a pattern.');
       }
       if (agent.investigating && !agent.awakened && agent.discrepancy >= 0.95 && agent.memory.length >= 3) {
@@ -646,6 +746,7 @@
       this._processModals();
       this._processRepairNodes();
       for (const agent of this.agents) {
+        this._updateRoutine(agent);
         this._move(agent);
         this._observe(agent);
         this._updateBelief(agent);
@@ -675,6 +776,7 @@
         anomalies: deepClone(this.anomalies),
         modalZones: deepClone(this.modalZones),
         relationships: deepClone(this.relationships),
+        places: deepClone(this.places),
         repairNodes: deepClone(this.repairNodes),
         repairPolicy: this.repairPolicy,
         receipts: deepClone(this.receipts),
@@ -698,7 +800,7 @@
 
     _restoreState(state) {
       const s = deepClone(state);
-      this.version = s.version || '0.3.0';
+      this.version = s.version || '0.4.0';
       this.seedText = s.seedText;
       this.seed = s.seed;
       this.config = Object.assign({}, DEFAULT_CONFIG, s.config || {});
@@ -709,6 +811,7 @@
       this.anomalies = s.anomalies || [];
       this.modalZones = s.modalZones || [];
       this.relationships = s.relationships || [];
+      this.places = s.places || [];
       this.repairNodes = s.repairNodes || [];
       this.repairPolicy = s.repairPolicy || 'tolerant';
       this.branchArchive = s.branchArchive || [];
@@ -742,7 +845,8 @@
         seed: this.seed,
         rng: this.random.getState(),
         repairPolicy: this.repairPolicy,
-        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length, a.testsRun]),
+        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.energy), round(a.socialNeed), a.currentActivity, a.plannedActivity, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length, a.testsRun, a.routineDeviations]),
+        places: this.places.map((p) => [p.id, p.x, p.y, p.type]),
         anomalies: this.anomalies.map((a) => [a.id, a.kind, a.x, a.y, round(a.intensity), a.ttl, a.active]),
         modals: this.modalZones.map((z) => [z.id, z.iteration, z.active]),
         relationships: this.relationships.map((r) => [r.id, round(r.trust), round(r.familiarity), r.signals]),
@@ -763,6 +867,7 @@
         anomalies: deepClone(this.anomalies),
         modalZones: deepClone(this.modalZones),
         relationships: deepClone(this.relationships),
+        places: deepClone(this.places),
         repairNodes: deepClone(this.repairNodes),
         repairPolicy: this.repairPolicy,
         receipts: deepClone(this.receipts),

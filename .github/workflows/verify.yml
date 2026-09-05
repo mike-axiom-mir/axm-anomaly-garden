@@ -1,0 +1,33 @@
+name: Verify Anomaly Garden
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check core engine
+        run: node --check src/sim.js
+      - name: Syntax check v0.7 extension
+        run: node --check src/v07.js
+      - name: Syntax check v0.8 replication extension
+        run: node --check src/v08.js
+      - name: Syntax check v0.8 browser helper
+        run: node --check src/v08-ui.js
+      - name: Syntax check browser controller
+        run: node --check src/app.js
+      - name: Full deterministic regression suite
+        run: npm test

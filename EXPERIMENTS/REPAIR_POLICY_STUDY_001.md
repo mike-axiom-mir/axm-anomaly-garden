@@ -46,7 +46,10 @@ node tools/batch-policy-study.js 24
 | projects completed | 0.50 | 1.25 | 1.46 |
 | resources acquired | 13.04 | 14.63 | 15.13 |
 | resources used | 23.92 | 25.38 | 25.50 |
-| causal receipts | 753.83 | 353.79 | 122.17 |
+| institution member reports | 86.71 | 86.29 | 33.00 |
+| institution narrative changes | 5.50 | 5.42 | 3.63 |
+| institution broadcasts | 18.00 | 18.00 | 18.00 |
+| causal receipts | 856.83 | 457.96 | 181.13 |
 
 Additional counts across 24 runs:
 
@@ -77,6 +80,7 @@ Those would require different evidence entirely.
 
 It is a useful regression target. Future changes to repair programs, perception, social topology, memory, or Modal behavior can rerun this study and show whether the causal character of the garden changed.
 
+
 ## Revision note
 
-The table above was rerun again after v0.5 added productive work, hunger, credits, owned/consumed resources, repeated social meetings, and long-running personal projects. Those additions changed random-consumption order and routine state, so the measured cascade changed again. The v0.4, v0.3, and v0.2 measurements remain in Git history; the current document always reports the current engine rather than freezing a prettier past result.
+The table above is now generated against v0.6.1. The bounded-institution layer adds report, narrative, and broadcast receipts, while the v0.6.1 runtime indexes deliberately do not alter simulation state. The core cascade/ordinary-life metrics remained identical across the v0.6 → v0.6.1 optimization run; only lookup cost changed. Older measurements remain in Git history rather than being silently rewritten away.

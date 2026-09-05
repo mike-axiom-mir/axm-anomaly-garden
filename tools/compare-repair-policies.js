@@ -29,6 +29,9 @@ function run(policy, seed) {
     projectsCompleted: sim.metrics.projectsCompleted,
     resourcesAcquired: sim.metrics.resourcesAcquired,
     resourcesUsed: sim.metrics.resourcesUsed,
+    institutionReports: sim.metrics.institutionReports,
+    narrativeChanges: sim.metrics.narrativeChanges,
+    institutionBroadcasts: sim.metrics.institutionBroadcasts,
     receipts: sim.receipts.length
   };
 }

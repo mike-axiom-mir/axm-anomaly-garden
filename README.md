@@ -44,9 +44,19 @@ The current build is deliberately offline and dependency-free in the browser: op
 ### Persistent social fabric
 
 - every inhabitant is connected to a durable relationship topology
-- relationship edges carry trust, familiarity, and signal counts
+- relationship edges carry trust, familiarity, signal counts, and repeated-meeting history
 - anomaly information propagates only through existing relationships and local encounter distance
 - successful exchanges alter the persistent relationship state
+
+### Bounded institutions
+
+- three institutions exist: Inquiry Circle, Maintenance Guild, and Commons Assembly
+- each inhabitant belongs to one institution with a persistent trust value
+- institutions **do not receive raw anomaly objects or Worldglass machine truth**
+- they receive rate-limited, source-linked member reports derived from observations, Modal memory, tests, or social testimony
+- each institution accumulates evidence and changes its own narrative using different explicit thresholds/frames
+- institutions periodically broadcast their current interpretation to members, which can modestly affect confidence/discrepancy
+- every report, narrative change, and broadcast is receipted
 
 ### Modal zones
 
@@ -111,7 +121,9 @@ Run it with:
 node tools/batch-policy-study.js 24
 ```
 
-The same batch now also exposes a built-in tradeoff in the current rules: investigation overrides routine movement, so worlds with more persistent anomaly investigation spend less time on scheduled work and social meetings. `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md` records that result and explicitly separates the rule-driven direction from the seed-dependent magnitude.
+The same batch now also tracks institutional reporting/narrative changes. `EXPERIMENTS/INSTITUTION_NARRATIVE_STUDY_001.md` records final narrative distributions and the hard boundary that institutions never receive machine truth.
+
+The same batch also exposes a built-in tradeoff in the current rules: investigation overrides routine movement, so worlds with more persistent anomaly investigation spend less time on scheduled work and social meetings. `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md` records that result and explicitly separates the rule-driven direction from the seed-dependent magnitude.
 
 ## Checks
 
@@ -138,6 +150,7 @@ The current suite checks:
 - exact deterministic continuation after restoring RNG state
 - inhabitant-authored investigation tests
 - abandoned-future archive preservation across rewind and export/import
+- institutional bounded-knowledge rules, report provenance, narrative change, broadcasts, and deterministic round-trip
 
 ## Truth boundary
 
@@ -149,7 +162,7 @@ The project is fiction-inspired, but fiction is not evidence. Claims about real 
 
 ## Direction, not destination
 
-The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
+The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography, deeper institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
 
 The guiding question remains:
 

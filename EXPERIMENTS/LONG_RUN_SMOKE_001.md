@@ -47,3 +47,25 @@ Before attempting very large worlds, useful next work includes:
 - performance tests at multiple population sizes
 
 The goal is to preserve truth/replay while avoiding a giant memory snowball.
+
+
+## v0.6 → v0.6.1 index optimization receipt
+
+The institution layer increased retained history and exposed repeated linear scans as a measurable bottleneck. A same-seed comparison was then run with seed `long-run-v06` and the same 2,000-tick intervention pattern.
+
+| Same run | v0.6 before runtime indexes | v0.6.1 after runtime indexes |
+| --- | ---: | ---: |
+| final fingerprint | `150d2391` | `150d2391` |
+| receipts | 14,809 | 14,809 |
+| production | 288.5448 | 288.5448 |
+| social meetings | 209 | 209 |
+| projects completed | 147 | 147 |
+| institution reports | 1,361 | 1,361 |
+| institution narrative changes | 6 | 6 |
+| institution broadcasts | 498 | 498 |
+| elapsed wall clock in this container | 28.20 s | 10.87 s |
+| peak process RSS | 166,132 KB | 143,956 KB |
+
+The exact same fingerprint and high-level state metrics matter more than the speedup: this was an implementation-path optimization, not a rules change. Runtime-only maps now index receipts, inhabitants, places, institutions, and anomaly/Modal creation receipts. Full history is still retained.
+
+The timing/memory values remain environment-specific engineering measurements, not portable performance claims.

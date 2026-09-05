@@ -25,6 +25,9 @@ function run(policy, seed) {
     projectsCompleted: sim.metrics.projectsCompleted,
     resourcesAcquired: sim.metrics.resourcesAcquired,
     resourcesUsed: sim.metrics.resourcesUsed,
+    institutionReports: sim.metrics.institutionReports,
+    narrativeChanges: sim.metrics.narrativeChanges,
+    institutionBroadcasts: sim.metrics.institutionBroadcasts,
     receipts: sim.receipts.length
   };
 }
@@ -54,6 +57,9 @@ for (const policy of policies) {
       projectsCompleted: Number(average(rows, 'projectsCompleted').toFixed(2)),
       resourcesAcquired: Number(average(rows, 'resourcesAcquired').toFixed(2)),
       resourcesUsed: Number(average(rows, 'resourcesUsed').toFixed(2)),
+      institutionReports: Number(average(rows, 'institutionReports').toFixed(2)),
+      narrativeChanges: Number(average(rows, 'narrativeChanges').toFixed(2)),
+      institutionBroadcasts: Number(average(rows, 'institutionBroadcasts').toFixed(2)),
       receipts: Number(average(rows, 'receipts').toFixed(2))
     },
     modelBreakFreeRuns: rows.filter((row) => row.modelBreaks === 0).length,

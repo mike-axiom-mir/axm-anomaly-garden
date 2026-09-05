@@ -54,7 +54,9 @@
     dayLength: 48,
     projectWorkStep: 0.032,
     hungerRate: 0.012,
-    resourcePrice: 1
+    resourcePrice: 1,
+    institutionBroadcastPeriod: 12,
+    institutionReportCooldown: 6
   });
 
   function makeId(prefix, n) {
@@ -64,11 +66,17 @@
   class GardenSimulation {
     constructor(options) {
       const opts = options || {};
-      this.version = '0.5.0';
+      this.version = '0.6.1';
       this.config = Object.assign({}, DEFAULT_CONFIG, opts.config || {});
       this.seedText = String(opts.seed || 'rabbit-001');
       this.seed = hashSeed(this.seedText);
       this.random = mulberry32(this.seed);
+      this._receiptById = new Map();
+      this._anomalyCreationById = new Map();
+      this._modalCreationById = new Map();
+      this._agentById = new Map();
+      this._institutionById = new Map();
+      this._placeByIdMap = new Map();
       this.tick = 0;
       this.receipts = [];
       this.interventions = [];
@@ -76,6 +84,7 @@
       this.anomalies = [];
       this.modalZones = [];
       this.relationships = [];
+      this.institutions = [];
       this.places = [];
       this.repairNodes = [];
       this.checkpoints = [];
@@ -103,12 +112,17 @@
         socialMeetings: 0,
         projectsCompleted: 0,
         resourcesAcquired: 0,
-        resourcesUsed: 0
+        resourcesUsed: 0,
+        institutionReports: 0,
+        narrativeChanges: 0,
+        institutionBroadcasts: 0
       };
       this._createPlaces();
       this._createAgents();
+      this._createInstitutions();
       this._createRelationships();
       this._createRepairNodes();
+      this._rebuildIndexes();
       this._receipt('world.initialized', {
         seed: this.seedText,
         seedHash: this.seed,
@@ -116,8 +130,22 @@
         dimensions: [this.config.width, this.config.height],
         relationshipEdges: this.relationships.length,
         repairNodes: this.repairNodes.length,
-        places: this.places.length
+        places: this.places.length,
+        institutions: this.institutions.length
       });
+    }
+
+    _rebuildIndexes() {
+      this._agentById = new Map(this.agents.map((agent) => [agent.id, agent]));
+      this._institutionById = new Map(this.institutions.map((institution) => [institution.id, institution]));
+      this._placeByIdMap = new Map(this.places.map((place) => [place.id, place]));
+      this._receiptById = new Map(this.receipts.map((receipt) => [receipt.id, receipt]));
+      this._anomalyCreationById = new Map();
+      this._modalCreationById = new Map();
+      for (const receipt of this.receipts) {
+        if (receipt.type === 'intervention.anomaly-added' && receipt.payload.anomaly) this._anomalyCreationById.set(receipt.payload.anomaly.id, receipt.id);
+        if (receipt.type === 'intervention.modal-added' && receipt.payload.modal) this._modalCreationById.set(receipt.payload.modal.id, receipt.id);
+      }
     }
 
     _createPlaces() {
@@ -154,6 +182,14 @@
         gardener: 'place-park'
       };
       const socialPlaces = ['place-cafe', 'place-park', 'place-market', 'place-station'];
+      const institutionByRole = {
+        maker: 'institution-inquiry',
+        analyst: 'institution-inquiry',
+        maintainer: 'institution-maintenance',
+        courier: 'institution-maintenance',
+        clerk: 'institution-commons',
+        gardener: 'institution-commons'
+      };
       const projectByRole = {
         maker: 'build-device',
         maintainer: 'restore-system',
@@ -205,7 +241,36 @@
           lastTestTick: -999,
           lastObservation: 'ordinary day'
         });
+        const agent = this.agents[this.agents.length - 1];
+        agent.institutionId = institutionByRole[role];
+        agent.institutionTrust = round(clamp(0.38 + agent.social * 0.25 + (1 - agent.skepticism) * 0.22, 0.2, 0.95));
+        agent.lastInstitutionReportReceipt = null;
+        agent.lastInstitutionReportTick = -999;
+        agent.institutionMessage = 'no institutional message yet';
       }
+    }
+
+    _createInstitutions() {
+      const specs = [
+        { id: 'institution-inquiry', name: 'Inquiry Circle', placeId: 'place-observatory', prior: 'insufficient-evidence', frame: 'test', warn: 2.2, strong: 4.2 },
+        { id: 'institution-maintenance', name: 'Maintenance Guild', placeId: 'place-repair-depot', prior: 'local-faults-expected', frame: 'repair', warn: 3.8, strong: 7.5 },
+        { id: 'institution-commons', name: 'Commons Assembly', placeId: 'place-cafe', prior: 'ordinary-world', frame: 'shared', warn: 2.8, strong: 5.2 }
+      ];
+      this.institutions = specs.map((spec) => ({
+        id: spec.id,
+        name: spec.name,
+        placeId: spec.placeId,
+        frame: spec.frame,
+        priorNarrative: spec.prior,
+        narrative: spec.prior,
+        warnThreshold: spec.warn,
+        strongThreshold: spec.strong,
+        evidenceWeight: 0,
+        reports: [],
+        reporters: [],
+        lastNarrativeChangeTick: 0,
+        broadcasts: 0
+      }));
     }
 
     _createRelationships() {
@@ -258,6 +323,7 @@
         parents: Array.isArray(parents) ? parents.filter(Boolean) : []
       };
       this.receipts.push(receipt);
+      if (this._receiptById) this._receiptById.set(receipt.id, receipt);
       return receipt;
     }
 
@@ -283,6 +349,7 @@
       };
       this.anomalies.push(anomaly);
       const receipt = this._receipt('intervention.anomaly-added', { anomaly: deepClone(anomaly) });
+      this._anomalyCreationById.set(anomaly.id, receipt.id);
       this._recordIntervention('anomaly', deepClone(anomaly), receipt.id);
       return anomaly;
     }
@@ -310,6 +377,7 @@
       const receipt = this._receipt('intervention.modal-added', {
         modal: deepClone(Object.assign({}, zone, { anchors: zone.anchors.slice() }))
       });
+      this._modalCreationById.set(zone.id, receipt.id);
       this._recordIntervention('modal', deepClone(zone), receipt.id);
       return zone;
     }
@@ -422,7 +490,7 @@
     }
 
     _placeById(id) {
-      return this.places.find((place) => place.id === id) || null;
+      return this._placeByIdMap.get(id) || null;
     }
 
     _plannedRoutine(agent) {
@@ -524,8 +592,8 @@
 
     _processSocialMeetings() {
       for (const relation of this.relationships) {
-        const a = this.agents.find((item) => item.id === relation.a);
-        const b = this.agents.find((item) => item.id === relation.b);
+        const a = this._agentById.get(relation.a);
+        const b = this._agentById.get(relation.b);
         if (!a || !b) continue;
         const together = a.currentActivity === 'social' && b.currentActivity === 'social' && a.x === b.x && a.y === b.y;
         if (!together) continue;
@@ -616,8 +684,7 @@
     }
 
     _findCreationReceipt(anomalyId) {
-      const receipt = this.receipts.find((item) => item.type === 'intervention.anomaly-added' && item.payload.anomaly && item.payload.anomaly.id === anomalyId);
-      return receipt ? receipt.id : null;
+      return this._anomalyCreationById.get(anomalyId) || null;
     }
 
     _describeAnomaly(kind) {
@@ -670,8 +737,8 @@
 
     _socialExchange() {
       for (const relation of this.relationships) {
-        const a = this.agents.find((item) => item.id === relation.a);
-        const b = this.agents.find((item) => item.id === relation.b);
+        const a = this._agentById.get(relation.a);
+        const b = this._agentById.get(relation.b);
         if (!a || !b || this._distance(a, b) > this.config.socialRadius) continue;
         const candidates = [[a, b], [b, a]];
         for (const pair of candidates) {
@@ -709,15 +776,14 @@
         if (age % zone.period !== 0) continue;
         zone.iteration += 1;
         this.metrics.modalResets += 1;
-        const creation = this.receipts.find((r) => r.type === 'intervention.modal-added' && r.payload.modal && r.payload.modal.id === zone.id);
-        const parent = creation ? creation.id : null;
+        const parent = this._modalCreationById.get(zone.id) || null;
         const resetReceipt = this._receipt('world.modal-reset', {
           modalId: zone.id,
           iteration: zone.iteration,
           anchoredAgents: zone.anchors.length
         }, parent ? [parent] : []);
         for (const anchor of zone.anchors) {
-          const agent = this.agents.find((item) => item.id === anchor.agentId);
+          const agent = this._agentById.get(anchor.agentId);
           if (!agent) continue;
           agent.x = anchor.x;
           agent.y = anchor.y;
@@ -798,7 +864,7 @@
           agent.discrepancy = clamp(agent.discrepancy - 0.025, 0, 1.5);
           agent.lastObservation = 'the suspected loop did not repeat for me';
         }
-        const creation = this.receipts.find((r) => r.type === 'intervention.modal-added' && r.payload.modal && r.payload.modal.id === zone.id);
+        const modalCreationId = this._modalCreationById.get(zone.id) || null;
         const receipt = this._receipt('inhabitant.ran-test', {
           agentId: agent.id,
           targetType: 'modal',
@@ -809,13 +875,120 @@
           result: supports ? 'supports-loop' : 'inconclusive',
           discrepancyBefore: round(before),
           discrepancyAfter: round(agent.discrepancy)
-        }, [creation ? creation.id : null, parent].filter(Boolean));
+        }, [modalCreationId, parent].filter(Boolean));
         this._remember(agent, receipt.id, agent.lastObservation);
         return receipt;
       }
 
       agent.lastTestTick = this.tick - this.config.testCooldown + 2;
       return null;
+    }
+
+    _institutionNarrativeFor(institution) {
+      const strong = institution.evidenceWeight >= institution.strongThreshold && institution.reporters.length >= 3;
+      const warn = institution.evidenceWeight >= institution.warnThreshold && institution.reporters.length >= 2;
+      if (institution.frame === 'test') {
+        if (strong) return 'persistent-inconsistency';
+        if (warn) return 'testable-anomaly-reports';
+      } else if (institution.frame === 'repair') {
+        if (strong) return 'systemic-fault-pattern';
+        if (warn) return 'repairable-faults';
+      } else {
+        if (strong) return 'community-pattern';
+        if (warn) return 'shared-unusual-reports';
+      }
+      return institution.priorNarrative;
+    }
+
+    _processInstitutionReports() {
+      const allowed = new Set(['inhabitant.observed-anomaly', 'inhabitant.modal-memory-leak', 'inhabitant.ran-test', 'inhabitant.shared-anomaly']);
+      for (const agent of this.agents) {
+        if (!agent.memory.length || !agent.institutionId) continue;
+        const memory = agent.memory[agent.memory.length - 1];
+        if (!memory.receiptId || memory.receiptId === agent.lastInstitutionReportReceipt) continue;
+        if (this.tick - agent.lastInstitutionReportTick < this.config.institutionReportCooldown) continue;
+        const source = this._receiptById.get(memory.receiptId);
+        if (!source || !allowed.has(source.type)) continue;
+        const institution = this._institutionById.get(agent.institutionId);
+        if (!institution) continue;
+        let base = 0.45;
+        if (source.type === 'inhabitant.observed-anomaly') base = 1;
+        else if (source.type === 'inhabitant.modal-memory-leak') base = 0.8;
+        else if (source.type === 'inhabitant.ran-test') base = source.payload.result && source.payload.result.startsWith('supports') ? 1.2 : 0.35;
+        const weight = round(base * (0.5 + agent.skepticism * 0.35 + agent.curiosity * 0.15));
+        const reportReceipt = this._receipt('institution.received-report', {
+          institutionId: institution.id,
+          sourceAgentId: agent.id,
+          sourceReceiptId: source.id,
+          sourceType: source.type,
+          weight
+        }, [source.id]);
+        institution.reports.push({
+          tick: this.tick,
+          agentId: agent.id,
+          sourceReceiptId: source.id,
+          reportReceiptId: reportReceipt.id,
+          sourceType: source.type,
+          weight
+        });
+        if (!institution.reporters.includes(agent.id)) institution.reporters.push(agent.id);
+        institution.evidenceWeight = round(institution.evidenceWeight + weight);
+        agent.lastInstitutionReportReceipt = source.id;
+        agent.lastInstitutionReportTick = this.tick;
+        this.metrics.institutionReports += 1;
+
+        const nextNarrative = this._institutionNarrativeFor(institution);
+        if (nextNarrative !== institution.narrative) {
+          const before = institution.narrative;
+          institution.narrative = nextNarrative;
+          institution.lastNarrativeChangeTick = this.tick;
+          this.metrics.narrativeChanges += 1;
+          const parents = institution.reports.slice(-5).map((report) => report.reportReceiptId);
+          this._receipt('institution.changed-narrative', {
+            institutionId: institution.id,
+            before,
+            after: nextNarrative,
+            evidenceWeight: institution.evidenceWeight,
+            uniqueReporters: institution.reporters.length
+          }, parents);
+        }
+      }
+    }
+
+    _processInstitutionBroadcasts() {
+      if (this.tick % this.config.institutionBroadcastPeriod !== 0) return;
+      for (const institution of this.institutions) {
+        const members = this.agents.filter((agent) => agent.institutionId === institution.id);
+        institution.broadcasts += 1;
+        this.metrics.institutionBroadcasts += 1;
+        const receipt = this._receipt('institution.broadcast', {
+          institutionId: institution.id,
+          narrative: institution.narrative,
+          memberCount: members.length,
+          broadcastNumber: institution.broadcasts
+        });
+        for (const agent of members) {
+          const trust = agent.institutionTrust || 0.5;
+          agent.institutionMessage = institution.name + ': ' + institution.narrative;
+          if (institution.frame === 'test' && institution.narrative !== institution.priorNarrative) {
+            agent.discrepancy = clamp(agent.discrepancy + 0.012 * trust, 0, 1.5);
+          } else if (institution.frame === 'repair') {
+            if (institution.narrative === 'systemic-fault-pattern') {
+              agent.discrepancy = clamp(agent.discrepancy + 0.004 * trust, 0, 1.5);
+            } else {
+              agent.discrepancy = clamp(agent.discrepancy - 0.006 * trust, 0, 1.5);
+              agent.confidence = clamp(agent.confidence + 0.008 * trust, 0, 1);
+            }
+          } else if (institution.frame === 'shared' && institution.narrative !== institution.priorNarrative) {
+            agent.discrepancy = clamp(agent.discrepancy + 0.006 * trust, 0, 1.5);
+          }
+          if (agent.memory.length && agent.investigating) {
+            const last = agent.memory[agent.memory.length - 1];
+            if (last.receiptId) receipt.parents.push(last.receiptId);
+          }
+        }
+        receipt.parents = Array.from(new Set(receipt.parents)).slice(-8);
+      }
     }
 
     _eligibleForRepair(anomaly) {
@@ -880,6 +1053,8 @@
       }
       this._processSocialMeetings();
       this._socialExchange();
+      this._processInstitutionReports();
+      this._processInstitutionBroadcasts();
       for (const agent of this.agents) this._updateBelief(agent);
       return this.snapshot();
     }
@@ -902,6 +1077,7 @@
         anomalies: deepClone(this.anomalies),
         modalZones: deepClone(this.modalZones),
         relationships: deepClone(this.relationships),
+        institutions: deepClone(this.institutions),
         places: deepClone(this.places),
         repairNodes: deepClone(this.repairNodes),
         repairPolicy: this.repairPolicy,
@@ -926,7 +1102,7 @@
 
     _restoreState(state) {
       const s = deepClone(state);
-      this.version = s.version || '0.5.0';
+      this.version = s.version || '0.6.1';
       this.seedText = s.seedText;
       this.seed = s.seed;
       this.config = Object.assign({}, DEFAULT_CONFIG, s.config || {});
@@ -937,6 +1113,7 @@
       this.anomalies = s.anomalies || [];
       this.modalZones = s.modalZones || [];
       this.relationships = s.relationships || [];
+      this.institutions = s.institutions || [];
       this.places = s.places || [];
       this.repairNodes = s.repairNodes || [];
       this.repairPolicy = s.repairPolicy || 'tolerant';
@@ -944,13 +1121,14 @@
       this.receipts = s.receipts || [];
       this.interventions = s.interventions || [];
       this.interventionLog = s.interventionLog || [];
-      this.metrics = Object.assign({ observations: 0, investigations: 0, socialSignals: 0, thresholdCrossings: 0, awakenings: 0, repairActions: 0, modalResets: 0, memoryLeaks: 0, rewinds: 0, testsRun: 0, archivedBranches: 0, production: 0, socialMeetings: 0, projectsCompleted: 0, resourcesAcquired: 0, resourcesUsed: 0 }, s.metrics || {});
+      this.metrics = Object.assign({ observations: 0, investigations: 0, socialSignals: 0, thresholdCrossings: 0, awakenings: 0, repairActions: 0, modalResets: 0, memoryLeaks: 0, rewinds: 0, testsRun: 0, archivedBranches: 0, production: 0, socialMeetings: 0, projectsCompleted: 0, resourcesAcquired: 0, resourcesUsed: 0, institutionReports: 0, narrativeChanges: 0, institutionBroadcasts: 0 }, s.metrics || {});
       this.nextReceiptId = s.counters ? s.counters.nextReceiptId : this.receipts.length + 1;
       this.nextAnomalyId = s.counters ? s.counters.nextAnomalyId : this.anomalies.length + 1;
       this.nextModalId = s.counters ? s.counters.nextModalId : this.modalZones.length + 1;
       this.nextCheckpointId = s.counters ? s.counters.nextCheckpointId : 1;
       this.nextBranchId = s.counters && s.counters.nextBranchId ? s.counters.nextBranchId : this.branchArchive.length + 1;
       if (s.checkpoints) this.checkpoints = s.checkpoints;
+      this._rebuildIndexes();
     }
 
     serialize() {
@@ -971,7 +1149,8 @@
         seed: this.seed,
         rng: this.random.getState(),
         repairPolicy: this.repairPolicy,
-        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.energy), round(a.socialNeed), round(a.hunger), round(a.credits, 2), a.inventory.food, a.ownedArtifacts.length, a.project.kind, round(a.project.progress), a.project.completions, a.currentActivity, a.plannedActivity, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length, a.testsRun, a.routineDeviations]),
+        agents: this.agents.map((a) => [a.id, a.x, a.y, round(a.energy), round(a.socialNeed), round(a.hunger), round(a.credits, 2), a.inventory.food, a.ownedArtifacts.length, a.project.kind, round(a.project.progress), a.project.completions, a.currentActivity, a.plannedActivity, round(a.discrepancy), round(a.confidence), a.hypothesis, a.investigating, a.awakened, a.memory.length, a.testsRun, a.routineDeviations, a.institutionId, round(a.institutionTrust), a.lastInstitutionReportReceipt, a.lastInstitutionReportTick, a.institutionMessage]),
+        institutions: this.institutions.map((i) => [i.id, i.narrative, round(i.evidenceWeight), i.reporters.length, i.reports.length, i.broadcasts]),
         places: this.places.map((p) => [p.id, p.x, p.y, p.type, p.resource, round(p.stock, 4), round(p.produced, 4), round(p.consumed, 4)]),
         anomalies: this.anomalies.map((a) => [a.id, a.kind, a.x, a.y, round(a.intensity), a.ttl, a.active]),
         modals: this.modalZones.map((z) => [z.id, z.iteration, z.active]),
@@ -993,6 +1172,7 @@
         anomalies: deepClone(this.anomalies),
         modalZones: deepClone(this.modalZones),
         relationships: deepClone(this.relationships),
+        institutions: deepClone(this.institutions),
         places: deepClone(this.places),
         repairNodes: deepClone(this.repairNodes),
         repairPolicy: this.repairPolicy,
@@ -1007,13 +1187,12 @@
     }
 
     causalAncestors(receiptId) {
-      const byId = new Map(this.receipts.map((receipt) => [receipt.id, receipt]));
       const visited = new Set();
       const ordered = [];
       const visit = (id) => {
         if (!id || visited.has(id)) return;
         visited.add(id);
-        const receipt = byId.get(id);
+        const receipt = this._receiptById.get(id);
         if (!receipt) return;
         for (const parent of receipt.parents) visit(parent);
         ordered.push(receipt);

@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#0b1014">
   <title>Anomaly Garden · Worldglass</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles-v02.css">
 </head>
 <body>
   <div class="ambient ambient-a"></div>
@@ -13,7 +14,7 @@
 
   <header class="topbar">
     <div>
-      <p class="eyebrow">AXM · PLAYABLE SIMULATION LAB</p>
+      <p class="eyebrow">AXM · PLAYABLE CAUSAL SIMULATION LAB</p>
       <h1>Anomaly Garden <span>/ Worldglass</span></h1>
       <p class="tagline">Build a world. Disturb one thing. See what notices.</p>
     </div>
@@ -29,6 +30,7 @@
           <button id="reset" class="primary">Reset</button>
         </div>
       </div>
+
       <div class="control-group">
         <label>Clock</label>
         <div class="button-row">
@@ -38,14 +40,38 @@
           <button id="pause">Pause</button>
         </div>
       </div>
+
       <div class="control-group intervention-group">
-        <label>Intervene without choosing the result</label>
+        <label>Disturb conditions, not outcomes</label>
         <div class="button-row wrap">
           <button data-anomaly="gravity-slip">Gravity slip</button>
           <button data-anomaly="loop-echo">Loop echo</button>
           <button data-anomaly="time-pocket">Time pocket</button>
           <button data-anomaly="memory-scar">Memory scar</button>
           <button id="whisper">Whisper</button>
+          <button id="modal">Plant Modal</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="repair-policy">Machine repair behavior</label>
+        <div class="inline">
+          <select id="repair-policy">
+            <option value="off">Off</option>
+            <option value="tolerant" selected>Tolerant</option>
+            <option value="aggressive">Aggressive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Causal branch tools</label>
+        <div class="button-row wrap">
+          <button id="checkpoint">Checkpoint</button>
+          <button id="rewind">Rewind latest</button>
+          <button id="export">Export state</button>
+          <button id="import">Import state</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
         </div>
       </div>
     </section>
@@ -55,17 +81,24 @@
       <article class="metric glass"><span>investigating</span><strong id="metric-investigating">0</strong></article>
       <article class="metric glass"><span>model breaks</span><strong id="metric-awake">0</strong></article>
       <article class="metric glass"><span>social signals</span><strong id="metric-signals">0</strong></article>
-      <article class="metric glass"><span>receipts</span><strong id="metric-receipts">0</strong></article>
+      <article class="metric glass"><span>repairs</span><strong id="metric-repairs">0</strong></article>
+      <article class="metric glass"><span>modal resets</span><strong id="metric-modals">0</strong></article>
+      <article class="metric glass fingerprint"><span>state fingerprint</span><strong id="metric-fingerprint">--------</strong></article>
     </section>
 
     <section class="worldglass-grid">
       <article class="panel world-panel glass">
         <div class="panel-head">
           <div><p class="eyebrow">INHABITANT LAYER</p><h2>The Garden</h2></div>
-          <div class="legend"><span class="dot normal"></span>routine <span class="dot investigate"></span>investigating <span class="dot awake"></span>model break</div>
+          <div class="legend">
+            <span class="dot normal"></span>routine
+            <span class="dot investigate"></span>investigating
+            <span class="dot awake"></span>model break
+            <span class="dot repair"></span>repair
+          </div>
         </div>
         <div id="world" class="world" aria-label="simulation world"></div>
-        <p class="world-note">Anomaly markers are shown to you because Worldglass exposes machine truth. The inhabitants do not automatically receive that information.</p>
+        <p class="world-note">Worldglass shows anomalies, Modals, and repair programs to you because they are machine truth. Inhabitants only receive what their simulated perception actually records.</p>
       </article>
 
       <aside class="panel truth-panel glass">
@@ -77,14 +110,15 @@
     <section class="lower-grid">
       <article class="panel glass">
         <div class="panel-head">
-          <div><p class="eyebrow">PERCEPTION</p><h2>Inhabitants</h2></div>
+          <div><p class="eyebrow">PERCEPTION + SOCIAL FABRIC</p><h2>Inhabitants</h2></div>
           <small>selected: <strong id="selected-agent">none</strong></small>
         </div>
+        <div id="selected-detail" class="selected-detail"></div>
         <div id="people-list" class="people-list"></div>
       </article>
 
       <article class="panel glass">
-        <div class="panel-head"><div><p class="eyebrow">CAUSAL MICROSCOPES</p><h2>Receipts</h2></div><small>tap one to trace ancestors</small></div>
+        <div class="panel-head"><div><p class="eyebrow">CAUSAL MICROSCOPE</p><h2>Receipts</h2></div><small>tap one to trace ancestors</small></div>
         <div id="causal-list" class="causal-list"></div>
       </article>
     </section>

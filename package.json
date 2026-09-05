@@ -1,0 +1,11 @@
+{
+  "name": "axm-anomaly-garden",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Offline deterministic causal simulation playground.",
+  "scripts": {
+    "test": "node tests/sim.test.js",
+    "experiment:repair": "node tools/compare-repair-policies.js",
+    "study:repair": "node tools/batch-policy-study.js 24"
+  }
+}

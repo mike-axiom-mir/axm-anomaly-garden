@@ -2,52 +2,135 @@
 
 > Build a world. Disturb one thing. See what notices.
 
-Anomaly Garden is a playful, inspectable simulation lab. The first prototype separates **machine truth** from **inhabitant perception**, lets the player introduce bounded anomalies without scripting the final outcome, and records causal receipts so surprising events can be traced backward.
+Anomaly Garden is a playful, inspectable simulation lab. It separates **machine truth** from **inhabitant perception**, lets the player alter conditions without scripting the final outcome, and records causal receipts so surprising events can be traced backward.
 
-## First executable slice
+The current build is deliberately offline and dependency-free in the browser: open `index.html`. No account, server, package manager, AI service, or internet connection is required.
 
-Open `index.html` in a modern browser. No install, account, server, package manager, AI service, or internet connection is required.
+## Current executable systems
 
-Implemented now:
+### Deterministic world
 
-- deterministic seeded simulation
-- 16 inhabitants with measurable curiosity, skepticism, social tendency, confidence, discrepancy, and investigation threshold
-- local anomaly interventions (`gravity-slip`, `loop-echo`, `time-pocket`, `memory-scar`)
-- a direct `whisper` intervention against the selected inhabitant
-- inhabitants move, notice or miss evidence, accumulate/lose discrepancy, investigate, and share anomaly signals socially
-- an explicit `world-model-is-incomplete` threshold event called a **model break** in the UI
-- machine-truth panel distinct from inhabitant observations
-- append-only causal receipts with parent links for intervention → observation → later behavior chains
-- causal ancestry inspection by clicking a receipt
-- deterministic reset/replay when the same seed and same sequence of interventions are used
-- offline responsive UI
+- seeded pseudo-random world generation
+- 16 inhabitants with measurable curiosity, skepticism, social tendency, confidence, discrepancy, and investigation thresholds
+- state fingerprint for quick trajectory comparison
+- exact RNG state is serializable, so an imported world can continue deterministically from the saved point
 
-## Truth boundary
+### Perception and model change
 
-This project does **not** claim that simulated inhabitants are conscious, sentient, alive, self-aware, or experiencing anything.
+- local anomaly interventions: `gravity-slip`, `loop-echo`, `time-pocket`, `memory-scar`
+- targeted `whisper` intervention against the selected inhabitant
+- inhabitants can encounter, notice, or miss anomaly evidence
+- discrepancy can accumulate or decay
+- inhabitants can enter an investigation state
+- a defined threshold can produce a **model break**: `world-model-is-incomplete`
+- this is a simulation state transition, not a claim of literal awakening or self-awareness
 
-Words such as *curiosity*, *belief*, *awakening*, *choice*, and *memory* are names for implemented simulation variables/behaviors. The current UI uses **model break** rather than claiming literal awakening: it means an inhabitant's internal consistency score crossed a defined threshold after sufficient recorded evidence.
+### Persistent social fabric
 
-The project is fiction-inspired, but fiction is not evidence. Any claim about real machines, humans, cognition, emergence, or physical reality requires separate evidence.
+- every inhabitant is connected to a durable relationship topology
+- relationship edges carry trust, familiarity, and signal counts
+- anomaly information propagates only through existing relationships and local encounter distance
+- successful exchanges alter the persistent relationship state
 
-## Run checks
+### Modal zones
 
-If Node.js is installed:
+- player can plant repeating local zones
+- a Modal captures inhabitants currently inside its radius as anchored participants
+- the zone resets those participants on a deterministic period
+- each reset can leak a configurable memory fragment
+- retained fragments become causal evidence and can contribute to later discrepancy
+
+### Machine repair programs
+
+- two local repair programs exist in machine truth
+- repair policy can be `off`, `tolerant`, or `aggressive`
+- repair nodes move toward eligible anomalies and reduce anomaly intensity / lifespan
+- every actual repair action receives a causal receipt
+- repair programs do not currently erase Modal memory fragments, making those two anomaly routes intentionally distinct
+
+### Causal branch tools
+
+- append-only receipts for interventions and major state transitions on the current branch
+- parent links for causal ancestry inspection
+- manual checkpoints
+- rewind to the latest retained checkpoint
+- rewind restores the full simulation state and RNG position, then records the rewind as a new intervention on the restored branch
+- complete JSON state export/import including topology, receipts, Modals, repair nodes, checkpoints, counters, and RNG state
+
+### Worldglass
+
+The interface deliberately shows two different layers:
+
+**Inhabitant layer**
+- what simulated inhabitants observe
+- their current hypothesis, discrepancy, confidence, memory count, and social context
+
+**Machine truth layer**
+- active anomalies
+- repair programs and policy
+- Modal zones
+- relationship edge count
+- causal receipts
+- deterministic state fingerprint
+
+The inhabitants do not automatically receive information merely because Worldglass shows it to the human player.
+
+## Measured experiment already included
+
+`EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` records a 24-seed comparison using the same intervention script under three repair policies.
+
+Inside the current ruleset, average model breaks across those runs were:
+
+- repair off: **9.75**
+- tolerant repair: **4.04**
+- aggressive repair: **0.00**
+
+That is a property of this simulation, not a general real-world claim. The experiment is retained so later engine changes can be compared against it rather than relying on memory or vibes.
+
+Run it with:
+
+```bash
+node tools/batch-policy-study.js 24
+```
+
+## Checks
+
+With Node.js installed:
 
 ```bash
 node tests/sim.test.js
 ```
 
-The test suite checks deterministic replay, seed divergence, causal parent links, intervention receipts, and world bounds.
+The current suite checks:
 
-## Current experiment
+- deterministic replay under same seed/actions
+- divergence under different seeds
+- causal parent links
+- intervention receipts
+- world bounds
+- connected persistent relationship topology
+- Modal resets and deterministic memory leaks
+- repair-node behavior
+- checkpoint/rewind
+- full serialization round-trip
+- exact deterministic continuation after restoring RNG state
 
-The prototype asks a narrow question:
+## Truth boundary
 
-> Can a player alter conditions without selecting the resulting inhabitant state, while still keeping every intervention and important transition inspectable?
+This project does **not** claim that simulated inhabitants are conscious, sentient, alive, self-aware, or experiencing anything.
 
-This is a starting organism, not a finished world. Future lanes can add richer geography, persistent relationships, nested modals/loops, local repair programs, Smith-like replication experiments, rewindable full-state snapshots, and stronger causal analysis without replacing the current truth/perception split.
+Words such as *curiosity*, *belief*, *memory*, *choice*, and *awakening* are shorthand for implemented variables and transition rules. The UI prefers **model break** for the strongest current transition because that describes what the code actually does.
+
+The project is fiction-inspired, but fiction is not evidence. Claims about real machines, humans, cognition, emergence, society, or physical reality require independent evidence.
+
+## Direction, not destination
+
+The Garden is meant to become a deeper causal playground rather than a scripted story recreation. Useful future layers include richer geography and daily life, institutions, competing machine programs, nested Modals, replayable full timelines, resource economies, replication experiments, local rule mutation, multiple kinds of memory, inhabitant-created tests, and stronger causal graph analysis.
+
+The guiding question remains:
+
+> Can we make a world where small understandable rules and interventions create outcomes we did not explicitly script, while still being able to inspect what actually happened?
 
 ## Agent workflow
 
-Read [`AGENTS.md`](AGENTS.md) before contributing. The repository uses **one chat = one PR lane** to prevent parallel AI work from silently spreading across branches or overwriting each other.
+Read [`AGENTS.md`](AGENTS.md) before contributing. The repository uses **one chat = one PR lane** so parallel AI work does not silently spread across branches or overwrite another lane.

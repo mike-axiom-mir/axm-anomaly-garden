@@ -23,6 +23,10 @@ jobs:
         run: node --check src/sim.js
       - name: Syntax check v0.7 extension
         run: node --check src/v07.js
+      - name: Syntax check v0.8 replication extension
+        run: node --check src/v08.js
+      - name: Syntax check v0.8 browser helper
+        run: node --check src/v08-ui.js
       - name: Syntax check browser controller
         run: node --check src/app.js
       - name: Full deterministic regression suite

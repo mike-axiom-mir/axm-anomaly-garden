@@ -7,6 +7,7 @@
   <title>Anomaly Garden · Worldglass</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="styles-v02.css">
+  <link rel="stylesheet" href="styles-v08.css">
 </head>
 <body>
   <div class="ambient ambient-a"></div>
@@ -75,6 +76,19 @@
             <option value="aggressive">Aggressive</option>
           </select>
         </div>
+      </div>
+
+      <div class="control-group">
+        <label for="replication-policy">Replication experiment</label>
+        <div class="inline">
+          <select id="replication-policy">
+            <option value="off" selected>Off</option>
+            <option value="bounded">Bounded</option>
+            <option value="open">Open</option>
+          </select>
+          <button id="seed-replicator">Seed R</button>
+        </div>
+        <div id="replication-readout" class="replication-readout">0 programs · load 0.00 · viability 1.00 · strain 0</div>
       </div>
 
       <div class="control-group">
@@ -147,6 +161,8 @@
 
   <script src="src/sim.js"></script>
   <script src="src/v07.js"></script>
+  <script src="src/v08.js"></script>
   <script src="src/app.js"></script>
+  <script src="src/v08-ui.js"></script>
 </body>
 </html>

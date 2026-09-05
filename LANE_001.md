@@ -37,6 +37,7 @@ Turn the empty repository into a truthful playable simulation foundation with en
 - command-line repair-policy, productive-life, long-run, and institution-narrative experiments
 - runtime receipt/agent/place/anomaly indexes that preserve the exact state result while reducing long-run lookup cost
 - exact cold-history chunks that remove old receipt objects from the hot graph while preserving ids, payloads, parents, causal lookup, export/import, and canonical fingerprint
+- optional v0.8 machine replicator with off/bounded/open admission, local-validity receipts, shared system load, budget refusal, and globally visible strain anomalies when open replication exceeds capacity
 - Worldglass now exposes institution narratives/proposals, commitments, productive-life details, and hot/cold receipt counts
 
 ## Deliberate non-claims
@@ -53,6 +54,7 @@ node tools/compare-repair-policies.js
 node tools/batch-policy-study.js 24
 node tools/institution-action-study.js 24
 node tools/history-compaction-study.js
+node tools/replication-study.js 24 120
 ```
 
 Current deterministic test suite: **PASS**.
@@ -82,7 +84,7 @@ The earlier headless Chromium attempt in this environment hung before rendering 
 3. Deepen institutions into internal factions, membership change, evidence challenge, dissent, cross-institution debate, and proposal outcomes while preserving bounded knowledge and voluntary participation.
 4. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.
 5. Add a branch-tree browser so archived futures can be reopened, compared, and forked without replacing canonical state.
-6. Add resource budgets and Smith-style replication experiments with locally valid but globally harmful transitions.
+6. Deepen the now-executable Smith-style replication experiment with containment/quarantine, competing programs, resource recovery, and branch comparison.
 7. Add richer repair-program strategies and compare suppression, tolerance, quarantine, explanation, and coexistence.
 8. Add spatial causal overlays and relationship-line visualization in Worldglass.
 9. Add preset batch runners and side-by-side scenario comparison so browser experiments can be repeated rather than merely planted.

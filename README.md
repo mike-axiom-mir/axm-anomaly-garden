@@ -61,6 +61,18 @@ The current build is deliberately offline and dependency-free in the browser: op
 - accepted participation is phase-bounded, and personal investigation can still override it
 - every report, narrative change, proposal, acceptance, session, and commitment end is causally inspectable
 
+### Locally valid replication vs global viability
+
+- v0.8 adds an optional machine-layer replicator experiment; it is **off by default**
+- a player can seed one replicator and choose `off`, `bounded`, or `open` copy admission
+- every accepted copy must pass the local transition rules: active parent, in-bounds empty target cell, hard instance limit
+- bounded admission refuses a locally possible copy when the projected shared system load would exceed the configured budget
+- open admission accepts locally valid copies beyond that budget; sustained excess load can generate receipted `silent-zone` strain anomalies
+- copy receipts link each child to its parent creation receipt, making the replication tree inspectable
+- the machine layer exposes shared load and a simple viability metric; those are explicit simulation mechanics, not claims about real computation or biology
+
+The fixed 24-seed / 120-tick study is recorded in `EXPERIMENTS/REPLICATION_STUDY_001.md`. In that exact model, bounded runs stabilized at 21 programs / 0.63 load with zero strain events, while open runs reached 45 programs / 1.35 load and generated 17 strain anomalies per run.
+
 ### Modal zones
 
 - player can plant repeating local zones
@@ -112,7 +124,7 @@ The inhabitants do not automatically receive information merely because Worldgla
 
 `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` records a 24-seed comparison using the same intervention script under three repair policies.
 
-Inside the current v0.7.0 ruleset, average model breaks across those runs were:
+Inside the retained v0.7.0 repair-policy ruleset, average model breaks across those runs were:
 
 - repair off: **13.38**
 - tolerant repair: **5.58**
@@ -157,6 +169,7 @@ The current suite checks:
 - abandoned-future archive preservation across rewind and export/import
 - institutional bounded-knowledge rules, report provenance, narrative change, voluntary proposals/commitments, sessions, opt-out configuration, and deterministic round-trip
 - exact cold-history compaction, hot→cold causal ancestry, fingerprint preservation, and deterministic continuation after import
+- locally valid replication, bounded shared-budget refusal, open-load strain, parent-linked copy receipts, and deterministic replication save/restore
 
 ## Truth boundary
 

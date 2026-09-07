@@ -34,11 +34,12 @@ Turn the empty repository into a truthful playable simulation foundation with en
 - dual Worldglass view: inhabitant layer vs machine truth
 - offline browser interface with no runtime dependency or network requirement
 - reproducible browser experiment presets
-- command-line repair-policy, productive-life, long-run, and institution-narrative experiments
+- command-line repair-policy, productive-life, long-run, institution, replication, and containment experiments
 - runtime receipt/agent/place/anomaly indexes that preserve the exact state result while reducing long-run lookup cost
 - exact cold-history chunks that remove old receipt objects from the hot graph while preserving ids, payloads, parents, causal lookup, export/import, and canonical fingerprint
 - optional v0.8 machine replicator with off/bounded/open admission, local-validity receipts, shared system load, budget refusal, and globally visible strain anomalies when open replication exceeds capacity
-- Worldglass now exposes institution narratives/proposals, commitments, productive-life details, and hot/cold receipt counts
+- optional v0.9 lineage-preserving quarantine that disables contained copies without deleting their parent-linked replication history, retains their occupied cells, and emits explicit containment-cycle receipts with residual strain still visible
+- Worldglass exposes the replication and quarantine controls, with active replicators shown separately from retained quarantined lineage
 
 ## Deliberate non-claims
 
@@ -49,17 +50,28 @@ No sentience, consciousness, genuine belief, genuine curiosity, literal awakenin
 ```bash
 npm test
 node --check src/sim.js
+node --check src/v07.js
+node --check src/v08.js
+node --check src/v09.js
 node --check src/app.js
 node tools/compare-repair-policies.js
 node tools/batch-policy-study.js 24
 node tools/institution-action-study.js 24
 node tools/history-compaction-study.js
 node tools/replication-study.js 24 120
+node tools/containment-study.js 24 120
 ```
 
-Current deterministic test suite: **PASS**.
+Current deterministic test suite: **PASS on GitHub Actions across seven suites**.
 
-The 24-seed repair study is recorded in `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` with explicit scope limits. Productive-life tradeoff, bounded-institution narrative distributions, voluntary proposal toggle results, exact cold-history measurements, and prior long-run scaling notes are recorded separately under `EXPERIMENTS/`.
+The current GitHub-measured containment study at tick 120 is recorded in `EXPERIMENTS/CONTAINMENT_STUDY_001.md`:
+
+- no containment: 45 active, load 1.35, viability 0.32, 17.00 strain events
+- quarantine: 21 active + 35.38 quarantined, load 0.63, viability 0.93, 3.29 strain events
+- investigations: 3.63 → 0.42
+- model breaks: 3.42 → 0.25
+
+The stale pre-reconstruction local figures were intentionally replaced by these repository-measured values.
 
 ## Browser truth boundary
 
@@ -75,16 +87,17 @@ The earlier headless Chromium attempt in this environment hung before rendering 
 - causal links cover major transitions but are not yet a complete provenance edge for every numeric state change
 - abandoned futures are preserved, but there is not yet a dedicated browser for opening and comparing archived branches side-by-side
 - JSON saves now support exact tuple-encoded cold causal history, but the cold format is still JSON text rather than a final binary/page-indexed archive
+- quarantine is reactive and deliberately imperfect; early strain remains in the causal record
 - UI has not yet received the real-browser visual smoke test described above
 
 ## Next useful deepening
 
-1. Deepen the productive-life layer into multiple task types, richer resource chains, leisure choices, trade, ownership transfer, and projects that can alter the shared world.
-2. Deepen inhabitant-authored experiments so investigators can repeat tests, compare results, share methods, and design stronger tests from prior evidence.
-3. Deepen institutions into internal factions, membership change, evidence challenge, dissent, cross-institution debate, and proposal outcomes while preserving bounded knowledge and voluntary participation.
-4. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.
-5. Add a branch-tree browser so archived futures can be reopened, compared, and forked without replacing canonical state.
-6. Deepen the now-executable Smith-style replication experiment with containment/quarantine, competing programs, resource recovery, and branch comparison.
+1. Build the **Future Explorer**: a branch-tree browser that can reopen archived futures, compare two trajectories, show the exact divergence receipt, and fork a retained branch without replacing canonical state.
+2. Deepen the productive-life layer into multiple task types, richer resource chains, leisure choices, trade, ownership transfer, and projects that can alter the shared world.
+3. Deepen inhabitant-authored experiments so investigators can repeat tests, compare results, share methods, and design stronger tests from prior evidence.
+4. Deepen institutions into internal factions, membership change, evidence challenge, dissent, cross-institution debate, and proposal outcomes while preserving bounded knowledge and voluntary participation.
+5. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.
+6. Deepen the replication lab beyond quarantine with competing programs, resource recovery, containment timing strategies, and branch comparison.
 7. Add richer repair-program strategies and compare suppression, tolerance, quarantine, explanation, and coexistence.
 8. Add spatial causal overlays and relationship-line visualization in Worldglass.
 9. Add preset batch runners and side-by-side scenario comparison so browser experiments can be repeated rather than merely planted.

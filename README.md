@@ -12,7 +12,8 @@ The current build is deliberately offline and dependency-free in the browser: op
 
 - seeded pseudo-random world generation
 - 16 inhabitants with measurable curiosity, skepticism, social tendency, confidence, discrepancy, and investigation thresholds
-- state fingerprint for quick trajectory comparison
+- state fingerprint for exact branch/control-state comparison
+- separate v0.10 **world digest** for modeled-world comparison without branch/receipt administration
 - exact RNG state is serializable, so an imported world can continue deterministically from the saved point
 - abandoned futures created by rewind are retained in a branch archive instead of silently disappearing
 - a 48-tick day cycle gives inhabitants persistent homes, roles, workplaces, social destinations, energy, social need, and planned activities
@@ -25,7 +26,7 @@ The current build is deliberately offline and dependency-free in the browser: op
 - inhabitants move toward their current routine destination instead of random-walking by default
 - investigation can pull an inhabitant away from the planned routine, and that deviation is counted in state
 - energy and social need change with current activity and remain bounded state variables
-- workplaces now hold real resource stock and accumulate production from inhabitants who reach scheduled work
+- workplaces hold real resource stock and accumulate production from inhabitants who reach scheduled work
 - inhabitants earn/spend credits, own/consume food, and carry inspectable inventory state
 - every inhabitant carries a role-shaped multi-day project; completion creates a persistent owned artifact
 - repeated social encounters become persistent meeting events that strengthen familiarity/trust
@@ -66,12 +67,42 @@ The current build is deliberately offline and dependency-free in the browser: op
 - v0.8 adds an optional machine-layer replicator experiment; it is **off by default**
 - a player can seed one replicator and choose `off`, `bounded`, or `open` copy admission
 - every accepted copy must pass the local transition rules: active parent, in-bounds empty target cell, hard instance limit
-- bounded admission refuses a locally possible copy when the projected shared system load would exceed the configured budget
+- bounded admission refuses a locally possible copy when projected shared system load would exceed the configured budget
 - open admission accepts locally valid copies beyond that budget; sustained excess load can generate receipted `silent-zone` strain anomalies
 - copy receipts link each child to its parent creation receipt, making the replication tree inspectable
 - the machine layer exposes shared load and a simple viability metric; those are explicit simulation mechanics, not claims about real computation or biology
 
 The fixed 24-seed / 120-tick study is recorded in `EXPERIMENTS/REPLICATION_STUDY_001.md`. In that exact model, bounded runs stabilized at 21 programs / 0.63 load with zero strain events, while open runs reached 45 programs / 1.35 load and generated 17 strain anomalies per run.
+
+### Lineage-preserving quarantine
+
+- v0.9 adds an optional `quarantine` containment policy; it is **off by default**
+- containment reacts only after repeated machine-layer strain has already occurred
+- contained replicators keep their id, parent, generation, position, and creation receipt
+- quarantined copies become inactive for replication/load but remain retained in lineage and keep their occupied cells
+- containment-cycle receipts explicitly record `deletionCount: 0`
+- early strain remains in the causal history rather than being retroactively erased
+
+The GitHub-measured 24-seed / 120-tick study is recorded in `EXPERIMENTS/CONTAINMENT_STUDY_001.md`. In that exact model, open replication without containment ended at 45 active programs / 1.35 load / 0.32 viability / 17.00 strain events, while quarantine averaged 21 active + 35.38 quarantined / 0.63 active load / 0.93 viability / 3.29 strain events.
+
+### Future Explorer
+
+v0.10 turns the preserved branch archive into an executable causal comparison layer.
+
+- lists the current future plus every retained archived future
+- gives each future a full state fingerprint and a separate modeled-world digest
+- compares two futures' ordered **non-administrative intervention logs**
+- identifies the first differing intervention and its actual receipt id
+- reports metric differences across investigations, model breaks, production, meetings, projects, strain, and containment
+- if tracked interventions are identical but world digests differ, reports `state-divergence-with-same-interventions` instead of inventing a cause
+- if world digests match but full fingerprints differ, reports `administrative-divergence`
+- can fork an archived future back into canonical play
+- before a fork, the previous current future is archived as another retained branch
+- the source archived future is not consumed or deleted by forking
+- fork/archive receipts record `deletionCount: 0`
+- forked states survive export/import and continue deterministically
+
+The deterministic fixture is documented in `EXPERIMENTS/FUTURE_EXPLORER_001.md`.
 
 ### Modal zones
 
@@ -96,8 +127,8 @@ The fixed 24-seed / 120-tick study is recorded in `EXPERIMENTS/REPLICATION_STUDY
 - manual checkpoints
 - rewind to the latest retained checkpoint
 - rewind archives the abandoned future with its fingerprint and full state before restoring the checkpoint
-- the restored branch records both the archive event and the rewind intervention
-- complete JSON state export/import including topology, hot/cold receipts, Modals, repair nodes, institutions, checkpoints, counters, branch archive, and RNG state
+- Future Explorer can compare/fork those retained branches without consuming them
+- complete JSON state export/import including topology, hot/cold receipts, Modals, repair nodes, institutions, checkpoints, counters, branch archive, RNG state, replication, containment, and Future Explorer-compatible branch state
 - exact cold-history compaction can move old receipt objects out of the hot graph without changing the canonical fingerprint or breaking ancestry lookup
 
 ### Worldglass
@@ -115,12 +146,14 @@ The interface deliberately shows two different layers:
 - relationship edge count
 - causal receipts, including exact cold-history chunks
 - institution narratives/proposals and voluntary commitments
+- replication load and containment state
 - archived abandoned futures
 - deterministic state fingerprint
+- Future Explorer branch comparison and safe forking
 
 The inhabitants do not automatically receive information merely because Worldglass shows it to the human player.
 
-## Measured experiment already included
+## Measured experiments already included
 
 `EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` records a 24-seed comparison using the same intervention script under three repair policies.
 
@@ -132,15 +165,15 @@ Inside the retained v0.7.0 repair-policy ruleset, average model breaks across th
 
 That is a property of this simulation, not a general real-world claim. The experiment is retained so later engine changes can be compared against it rather than relying on memory or vibes.
 
-Run it with:
+The repository also retains:
 
-```bash
-node tools/batch-policy-study.js 24
-```
-
-The same batch also tracks institutional reporting/narrative changes. `EXPERIMENTS/INSTITUTION_NARRATIVE_STUDY_001.md` records final narrative distributions and the hard boundary that institutions never receive machine truth. `EXPERIMENTS/INSTITUTION_ACTION_STUDY_001.md` separately toggles the proposal layer on/off so institutional influence is testable rather than assumed.
-
-The same batch also exposes a built-in time-allocation tradeoff: investigation can override ordinary routine and accepted institution commitments can redirect only phase-appropriate time. `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md` records that result and explicitly separates designed direction from seed-dependent magnitude. `EXPERIMENTS/COLD_HISTORY_STUDY_001.md` records exact causal-history compaction with fingerprint preservation.
+- `EXPERIMENTS/INSTITUTION_NARRATIVE_STUDY_001.md`
+- `EXPERIMENTS/INSTITUTION_ACTION_STUDY_001.md`
+- `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md`
+- `EXPERIMENTS/COLD_HISTORY_STUDY_001.md`
+- `EXPERIMENTS/REPLICATION_STUDY_001.md`
+- `EXPERIMENTS/CONTAINMENT_STUDY_001.md`
+- `EXPERIMENTS/FUTURE_EXPLORER_001.md`
 
 ## Checks
 
@@ -170,6 +203,10 @@ The current suite checks:
 - institutional bounded-knowledge rules, report provenance, narrative change, voluntary proposals/commitments, sessions, opt-out configuration, and deterministic round-trip
 - exact cold-history compaction, hot→cold causal ancestry, fingerprint preservation, and deterministic continuation after import
 - locally valid replication, bounded shared-budget refusal, open-load strain, parent-linked copy receipts, and deterministic replication save/restore
+- lineage-preserving quarantine, retained occupied cells, parent-linked quarantine receipts, explicit no-deletion cycles, and deterministic continuation
+- Future Explorer intervention divergence, same-intervention state-drift alarms, no-loss future forking, world-digest restoration, and deterministic fork round-trip
+
+GitHub Actions currently runs the full eight-suite regression set plus the containment and Future Explorer study fixtures.
 
 ## Truth boundary
 
@@ -177,15 +214,24 @@ This project does **not** claim that simulated inhabitants are conscious, sentie
 
 Words such as *curiosity*, *belief*, *memory*, *choice*, and *awakening* are shorthand for implemented variables and transition rules. The UI prefers **model break** for the strongest current transition because that describes what the code actually does.
 
-The project is fiction-inspired, but fiction is not evidence. Claims about real machines, humans, cognition, emergence, society, or physical reality require independent evidence.
+The project is fiction-inspired, but fiction is not evidence. Claims about real machines, humans, cognition, emergence, society, physical reality, or the actual future require independent evidence.
+
+Future Explorer does not turn the Garden into a crystal ball. A simulated future is conditional on its starting state, rules, uncertainty treatment, interventions, and model validity.
 
 ## Direction, not destination
 
-The Garden is meant to become a deeper causal playground rather than a scripted story recreation. The browser now includes reproducible starting presets for quiet, open-glitch, tolerant-loop, and aggressive-control conditions; the preset chooses starting conditions, not outcomes. Useful future layers include richer geography, institution dissent/factions, competing machine programs, nested Modals, reopenable branch trees, resource economies, replication experiments, local rule mutation, multiple kinds of memory, richer inhabitant-designed experiments, and stronger causal graph analysis.
+The next major direction is a **Baseline Lab / Future Envelope**:
+
+- admit an external starting state with provenance on each field
+- distinguish `observed`, `estimated`, `contested`, and `unknown`
+- branch multiple plausible baseline variants instead of manufacturing one perfect starting state
+- explore conditional futures from those baselines
+- add backtesting against known historical outcomes
+- add sensitivity analysis so the system can show which assumptions actually control a conclusion
 
 The guiding question remains:
 
-> Can we make a world where small understandable rules and interventions create outcomes we did not explicitly script, while still being able to inspect what actually happened?
+> Can we make a world where small understandable rules and interventions create outcomes we did not explicitly script, while still being able to inspect what actually happened and what assumptions made that future possible?
 
 ## Agent workflow
 

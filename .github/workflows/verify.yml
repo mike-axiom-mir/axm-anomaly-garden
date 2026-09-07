@@ -31,9 +31,15 @@ jobs:
         run: node --check src/v09.js
       - name: Syntax check v0.9 browser helper
         run: node --check src/v09-ui.js
+      - name: Syntax check v0.10 Future Explorer extension
+        run: node --check src/v10.js
+      - name: Syntax check v0.10 Future Explorer UI
+        run: node --check src/v10-ui.js
       - name: Syntax check browser controller
         run: node --check src/app.js
       - name: Full deterministic regression suite
         run: npm test
       - name: Containment regression study
         run: node tools/containment-study.js 24 120
+      - name: Future Explorer regression study
+        run: node tools/future-explorer-study.js

@@ -34,16 +34,17 @@ Turn the empty repository into a truthful playable simulation foundation with en
 - dual Worldglass view: inhabitant layer vs machine truth
 - offline browser interface with no runtime dependency or network requirement
 - reproducible browser experiment presets
-- command-line repair-policy, productive-life, long-run, institution, replication, and containment experiments
+- command-line repair-policy, productive-life, long-run, institution, replication, containment, and future-comparison experiments
 - runtime receipt/agent/place/anomaly indexes that preserve the exact state result while reducing long-run lookup cost
 - exact cold-history chunks that remove old receipt objects from the hot graph while preserving ids, payloads, parents, causal lookup, export/import, and canonical fingerprint
 - optional v0.8 machine replicator with off/bounded/open admission, local-validity receipts, shared system load, budget refusal, and globally visible strain anomalies when open replication exceeds capacity
 - optional v0.9 lineage-preserving quarantine that disables contained copies without deleting their parent-linked replication history, retains their occupied cells, and emits explicit containment-cycle receipts with residual strain still visible
-- Worldglass exposes the replication and quarantine controls, with active replicators shown separately from retained quarantined lineage
+- v0.10 Future Explorer that lists retained futures, compares two trajectories, separates world digest from full administrative fingerprint, reports the first differing non-administrative intervention/receipt, and can safely fork an archived future while preserving both the source archive and the previous current future
+- Worldglass exposes replication/quarantine controls plus a branch-tree Future Explorer surface
 
 ## Deliberate non-claims
 
-No sentience, consciousness, genuine belief, genuine curiosity, literal awakening, or real-world social law is claimed. These are implemented simulation variables and transitions only.
+No sentience, consciousness, genuine belief, genuine curiosity, literal awakening, real-world social law, or literal future prediction is claimed. These are implemented simulation variables, transition rules, and conditional trajectories only.
 
 ## Verification performed
 
@@ -53,6 +54,7 @@ node --check src/sim.js
 node --check src/v07.js
 node --check src/v08.js
 node --check src/v09.js
+node --check src/v10.js
 node --check src/app.js
 node tools/compare-repair-policies.js
 node tools/batch-policy-study.js 24
@@ -60,11 +62,12 @@ node tools/institution-action-study.js 24
 node tools/history-compaction-study.js
 node tools/replication-study.js 24 120
 node tools/containment-study.js 24 120
+node tools/future-explorer-study.js
 ```
 
-Current deterministic test suite: **PASS on GitHub Actions across seven suites**.
+Current deterministic test suite: **PASS on GitHub Actions across eight suites**.
 
-The current GitHub-measured containment study at tick 120 is recorded in `EXPERIMENTS/CONTAINMENT_STUDY_001.md`:
+### Current GitHub-measured containment study
 
 - no containment: 45 active, load 1.35, viability 0.32, 17.00 strain events
 - quarantine: 21 active + 35.38 quarantined, load 0.63, viability 0.93, 3.29 strain events
@@ -73,9 +76,22 @@ The current GitHub-measured containment study at tick 120 is recorded in `EXPERI
 
 The stale pre-reconstruction local figures were intentionally replaced by these repository-measured values.
 
+### Future Explorer regression fixture
+
+The deterministic two-future fixture produced:
+
+- archived Future A world digest: `b2f8df94`
+- current Future B world digest: `0727b8fc`
+- first differing interventions were identified from their actual intervention receipts
+- forking Future A preserved Future B as `branch-002`
+- restored Future A matched its source modeled-world digest exactly before new fork/archive receipts were appended
+- Future A remained archived after the fork rather than being consumed
+
+The full source fingerprint can differ after restoration because archive/control history changes. v0.10 therefore exposes a separate **world digest** that excludes branch/receipt administration and uses that for modeled-world equivalence.
+
 ## Browser truth boundary
 
-The earlier headless Chromium attempt in this environment hung before rendering due to the container desktop/DBus setup. Engine behavior and JavaScript syntax are verified, but a real-browser visual/runtime smoke test remains a separate gate and is not silently claimed complete.
+The earlier headless Chromium attempt in this environment hung before rendering due to the container desktop/DBus setup. Engine behavior, browser-script syntax, and Future Explorer logic are verified, but a real-browser visual/runtime smoke test remains a separate gate and is not silently claimed complete.
 
 ## Known limitations
 
@@ -85,23 +101,23 @@ The earlier headless Chromium attempt in this environment hung before rendering 
 - Modal reset behavior currently targets position/discrepancy/memory-fragment mechanics, not a full nested subworld snapshot
 - repair programs act only on anomaly objects, not every possible inconsistent state
 - causal links cover major transitions but are not yet a complete provenance edge for every numeric state change
-- abandoned futures are preserved, but there is not yet a dedicated browser for opening and comparing archived branches side-by-side
-- JSON saves now support exact tuple-encoded cold causal history, but the cold format is still JSON text rather than a final binary/page-indexed archive
+- Future Explorer identifies tracked intervention divergence and world-state divergence, but it deliberately refuses to invent a cause when identical tracked interventions lead to different world digests
+- JSON saves support exact tuple-encoded cold causal history, but the cold format is still JSON text rather than a final binary/page-indexed archive
 - quarantine is reactive and deliberately imperfect; early strain remains in the causal record
-- UI has not yet received the real-browser visual smoke test described above
+- the Future Explorer UI has not yet received a real-browser visual smoke test
 
 ## Next useful deepening
 
-1. Build the **Future Explorer**: a branch-tree browser that can reopen archived futures, compare two trajectories, show the exact divergence receipt, and fork a retained branch without replacing canonical state.
-2. Deepen the productive-life layer into multiple task types, richer resource chains, leisure choices, trade, ownership transfer, and projects that can alter the shared world.
-3. Deepen inhabitant-authored experiments so investigators can repeat tests, compare results, share methods, and design stronger tests from prior evidence.
-4. Deepen institutions into internal factions, membership change, evidence challenge, dissent, cross-institution debate, and proposal outcomes while preserving bounded knowledge and voluntary participation.
-5. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.
-6. Deepen the replication lab beyond quarantine with competing programs, resource recovery, containment timing strategies, and branch comparison.
-7. Add richer repair-program strategies and compare suppression, tolerance, quarantine, explanation, and coexistence.
-8. Add spatial causal overlays and relationship-line visualization in Worldglass.
-9. Add preset batch runners and side-by-side scenario comparison so browser experiments can be repeated rather than merely planted.
-10. Continue the scaling work: hot/cold history, checkpoint compaction, causal paging, archived-branch compression, and multi-population benchmarks.
+1. Build the **Baseline Lab / Future Envelope**: admit an external starting state with per-field provenance and confidence (`observed`, `estimated`, `contested`, `unknown`), then branch conditional futures without turning uncertain inputs into facts.
+2. Add backtesting: start from an older known baseline, run the model forward, and compare its envelope with the historical outcome before trusting it for real scenario work.
+3. Add sensitivity analysis so Future Explorer can show which assumptions/interventions actually control an outcome and which conclusions survive across many plausible baselines.
+4. Deepen the productive-life layer into richer resource chains, leisure choices, trade, ownership transfer, and projects that can alter the shared world.
+5. Deepen inhabitant-authored experiments so investigators can repeat tests, compare results, share methods, and design stronger tests from prior evidence.
+6. Deepen institutions into internal factions, membership change, evidence challenge, dissent, cross-institution debate, and proposal outcomes while preserving bounded knowledge and voluntary participation.
+7. Add nested Modal state snapshots with per-zone clocks and richer reset semantics.
+8. Deepen the replication lab beyond quarantine with competing programs, resource recovery, containment timing strategies, and Future Explorer branch comparison.
+9. Add spatial causal overlays and relationship-line visualization in Worldglass.
+10. Continue scaling work: checkpoint compaction, causal paging, archived-branch compression, and multi-population benchmarks.
 
 ## Lane discipline
 

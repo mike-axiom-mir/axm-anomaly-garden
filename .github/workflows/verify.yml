@@ -27,7 +27,13 @@ jobs:
         run: node --check src/v08.js
       - name: Syntax check v0.8 browser helper
         run: node --check src/v08-ui.js
+      - name: Syntax check v0.9 containment extension
+        run: node --check src/v09.js
+      - name: Syntax check v0.9 browser helper
+        run: node --check src/v09-ui.js
       - name: Syntax check browser controller
         run: node --check src/app.js
       - name: Full deterministic regression suite
         run: npm test
+      - name: Containment regression study
+        run: node tools/containment-study.js 24 120

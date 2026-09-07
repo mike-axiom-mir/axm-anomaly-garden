@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="styles-v02.css">
   <link rel="stylesheet" href="styles-v08.css">
+  <link rel="stylesheet" href="styles-v09.css">
 </head>
 <body>
   <div class="ambient ambient-a"></div>
@@ -92,6 +93,17 @@
       </div>
 
       <div class="control-group">
+        <label for="containment-policy">Replication containment</label>
+        <div class="inline">
+          <select id="containment-policy">
+            <option value="off" selected>Off</option>
+            <option value="quarantine">Quarantine</option>
+          </select>
+        </div>
+        <div id="containment-readout" class="containment-readout">0 active · 0 quarantined · 0 containment cycles</div>
+      </div>
+
+      <div class="control-group">
         <label>Causal branch tools</label>
         <div class="button-row wrap">
           <button id="checkpoint">Checkpoint</button>
@@ -162,7 +174,9 @@
   <script src="src/sim.js"></script>
   <script src="src/v07.js"></script>
   <script src="src/v08.js"></script>
+  <script src="src/v09.js"></script>
   <script src="src/app.js"></script>
   <script src="src/v08-ui.js"></script>
+  <script src="src/v09-ui.js"></script>
 </body>
 </html>

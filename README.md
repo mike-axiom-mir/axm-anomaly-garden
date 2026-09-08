@@ -27,15 +27,7 @@ A living subworld is initialized explicitly on an already-existing nested Modal.
 
 Important local transitions still write to the outer causal ledger, so a reset does not erase history.
 
-Local resident state currently includes:
-
-- position
-- curiosity / skepticism
-- confidence / discrepancy
-- local memory
-- investigation threshold
-- investigating state
-- local model-break state
+Local resident state currently includes position, curiosity/skepticism, confidence/discrepancy, local memory, an investigation threshold, investigating state, and local model-break state.
 
 Local anomaly evidence does **not** automatically become outer-world knowledge. Evidence can cross outward only through the explicit deterministic subworld-memory leak path into the existing `inhabitant.modal-memory-leak` mechanism.
 
@@ -103,16 +95,7 @@ The v0.12 suite checks capability denial, jurisdiction denial, target-not-observ
 
 ## Worldglass
 
-The browser exposes machine truth separately from inhabitant perception and now includes:
-
-- replication + containment controls
-- Modal Tree
-- Future Explorer
-- living nested-subworld controls
-- local anomaly/replicator seeding
-- warden/repairer deployment
-- local resident/program/security readouts
-- causal receipts
+The browser exposes machine truth separately from inhabitant perception and now includes replication + containment controls, Modal Tree, Future Explorer, living nested-subworld controls, local anomaly/replicator seeding, warden/repairer deployment, local resident/program/security readouts, and causal receipts.
 
 Browser-script syntax and engine behavior are verified. A trustworthy real-browser visual smoke test is still not claimed complete because the prior container Chromium environment failed around desktop/DBus.
 

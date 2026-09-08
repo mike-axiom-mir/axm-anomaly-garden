@@ -43,6 +43,8 @@ jobs:
         run: node --check src/v12.js
       - name: Syntax check v0.12 living subworld/security UI
         run: node --check src/v12-ui.js
+      - name: Syntax check v0.13 cross-layer extension
+        run: node --check src/v13.js
       - name: Syntax check browser controller
         run: node --check src/app.js
       - name: Full deterministic regression suite

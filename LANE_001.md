@@ -24,20 +24,11 @@ Grow one truthful playable causal world without rebuilding or splitting this cha
 - v0.12 living nested subworlds with local residents/anomalies/programs plus bounded security-program ecology
 - offline Worldglass browser build; no account/cloud/AI/network requirement at runtime
 
-## v0.12 change boundary — living subworld + security ecology
+## v0.12 change boundary
 
 v0.12 stays additive over v0.11. Root and nested Modal clock/reset semantics remain underneath it. A living subworld is initialized explicitly on an existing nested Modal rather than silently changing every Modal.
 
-A living nested subworld owns:
-
-- bounded local grid
-- deterministic local residents with local perception, memory, discrepancy, investigation and model-break state
-- local anomalies
-- local machine programs
-- locally-valid local replication
-- reset-to-seeded-baseline state when the enclosing Modal resets
-- global causal receipts for major local transitions so reset does not erase history
-- evidence leakage into the existing outer `inhabitant.modal-memory-leak` path only through an explicit deterministic leak gate
+A living nested subworld owns a bounded local grid, deterministic local residents, local anomalies, local machine programs, locally-valid local replication, reset-to-seeded-baseline state, global causal receipts that survive reset, and explicit evidence leakage into the outer memory path.
 
 ### Bounded Agent/security programs
 
@@ -48,22 +39,11 @@ Security roles are capability bundles rather than omniscient controllers:
 - `repairer` → observe + repair anomalies
 - `custodian` → both action capabilities
 
-A security action is admitted only if all gates pass:
-
-1. **jurisdiction** — same Modal subworld
-2. **capability** — role actually owns the action
-3. **knowledge** — target has been observed by that program
-4. **range** — target is inside action radius
-
-Blocked attempts receive `security.action-blocked` receipts with the failed gate. Program quarantine is no-loss: the target remains retained with lineage and `deletionCount: 0`.
-
-Worldglass adds a living-subworld panel with controls to initialize a nested local world, seed a local anomaly/replicator, and deploy bounded warden/repairer programs.
+A security action passes only after jurisdiction, capability, knowledge, and range gates all succeed. Failed attempts emit `security.action-blocked`. Quarantine retains target lineage and records `deletionCount: 0`.
 
 ## GitHub-measured v0.12 comparison
 
 `node tools/subworld-security-study.js 12 35`
-
-Each of 12 seeds contains 4 local residents, one strong local anomaly, and one denied replicator. Only the security condition changes.
 
 | Average at tick 35 | No security | Bounded security |
 | --- | ---: | ---: |
@@ -78,65 +58,40 @@ Each of 12 seeds contains 4 local residents, one strong local anomaly, and one d
 | security actions | 0.00 | 10.00 |
 | evidence leaks outward | 3.42 | 2.67 |
 
-Sample world digests:
+Sample world digests: no security `49fc8c00`; bounded security `ac5835fa`.
 
-- no security: `49fc8c00`
-- bounded security: `ac5835fa`
-
-The measured result supports only a narrow claim inside this ruleset: bounded security strongly reduced the denied local replication and repaired the seeded anomaly. It does **not** support a claim that security prevented local investigations/model breaks, because both conditions measured zero of those transitions.
-
-See `EXPERIMENTS/SUBWORLD_SECURITY_STUDY_001.md`.
+The narrow result is that bounded security reduced the denied local replication and repaired the seeded anomaly. It does **not** show prevention of investigation/model-break transitions because both conditions measured zero.
 
 ## Verification
 
-GitHub Actions run #34 on head `33edd06...`: **PASS**.
+GitHub Actions run #34: **PASS** on the v0.12 browser/test head.
 
-It ran:
-
-- syntax checks through v0.12 and browser helpers
+- syntax through v0.12 + browser helpers
 - full deterministic regression suite across **ten suites**
-- containment regression study
-- Future Explorer regression study
-- nested Modal regression study
+- containment study
+- Future Explorer study
+- nested Modal study
 - living-subworld/security comparison study
 
-The v0.12 tests cover:
-
-- deterministic same-seed living-subworld continuation
-- nested-only initialization boundary
-- local anomaly evidence receipts
-- explicit capability denial
-- cross-Modal jurisdiction denial
-- no-omniscience / target-not-observed gate
-- action-range denial
-- no-loss program quarantine
-- repairer/warden capability separation
-- executable local replication
-- Modal reset restoring seeded local state without erasing history
-- exact serialization and deterministic continuation
+v0.12 tests cover deterministic continuation, nested-only initialization, local evidence, capability denial, cross-Modal jurisdiction denial, target-not-observed denial, action-range denial, no-loss quarantine, role separation, local replication, reset-baseline restoration without history deletion, and exact serialization/restore.
 
 ## Deliberate non-claims
 
-No sentience, consciousness, literal awakening, real-world social law, literal future prediction, evidence that physical reality is simulated, or universal security theorem is claimed.
-
-The v0.12 local residents are bounded simulation actors. Security roles, sensing ranges, anomaly effects, replication periods, reset rules, and thresholds are explicit model choices.
+No sentience, consciousness, literal awakening, real-world social law, literal future prediction, evidence that physical reality is simulated, or universal security theorem is claimed. v0.12 residents and security programs are bounded simulation actors under explicit model rules.
 
 ## Browser truth boundary
 
-The v0.12 browser scripts pass syntax checks and are wired into `index.html`, but the earlier container Chromium/DBus problem still prevents a trustworthy real-browser visual smoke claim. Engine behavior is verified; visual/runtime polish remains a separate gate.
+The v0.12 browser scripts pass syntax checks and are wired into `index.html`, but the earlier container Chromium/DBus problem still prevents a trustworthy real-browser visual smoke claim. Engine behavior is verified; visual/runtime polish remains separate.
 
 ## Next Matrix deepening
 
-1. Let bounded local residents/programs cross between compatible Modal layers through explicit gates rather than teleporting state.
-2. Add richer Agent/security ecology: multiple jurisdictions, handoff/escalation, competing policies, limited budgets, and appeal/repair paths without a single global controller.
-3. Give nested subworlds richer local tasks/resources and small economies without duplicating the entire outer civilization engine at once.
-4. Deepen inhabitant experiments so methods can be repeated, taught, challenged, and improved from prior evidence.
-5. Deepen institutions into factions, dissent, evidence challenge, membership changes, and proposal outcomes while preserving bounded knowledge.
-6. Deepen replication beyond quarantine with competing programs, resource recovery, containment timing, and Future Explorer comparison.
-7. Add stronger spatial causal/relationship overlays and branch-tree visualization.
-8. Continue scaling: checkpoint compaction, causal paging, archived-branch compression, and larger populations.
-9. Later return to Baseline Lab / Future Envelope for sourced scenario work with provenance/backtesting/sensitivity analysis.
-10. Keep Foundation Planet / Grammar Glass / Holodeck integration as the separate weekend architecture experiment; do not contaminate this Matrix lane with Planet implementation work.
+1. Cross-layer movement/handoff through explicit gates rather than teleporting state.
+2. Multiple security jurisdictions, policy handoffs/escalation, limited budgets, and repair/appeal paths without a global controller.
+3. Richer local tasks/resources and small economies inside nested subworlds.
+4. Stronger inhabitant experiments and institution dissent/evidence challenge.
+5. Replication competition/resource recovery/containment timing with Future Explorer comparison.
+6. Better spatial causal/relationship overlays and larger-scale history storage.
+7. Keep Foundation Planet / Grammar Glass / Holodeck as the separate weekend architecture experiment.
 
 ## Lane discipline
 

@@ -173,8 +173,6 @@
         }
       }
 
-      this.metrics.completionAudits += 1;
-      if (errors.length) this.metrics.completionAuditFailures += 1;
       return {
         pass: errors.length === 0,
         tick: this.tick,
@@ -190,6 +188,19 @@
         errors,
         warnings
       };
+    }
+
+    runCompletionAudit() {
+      const report = this.worldIntegrityReport();
+      this.metrics.completionAudits += 1;
+      if (!report.pass) this.metrics.completionAuditFailures += 1;
+      this._receipt('world.completion-audit', {
+        pass: report.pass,
+        errors: report.errors.length,
+        warnings: report.warnings.length,
+        fingerprint: report.fingerprint
+      }, []);
+      return report;
     }
 
     worldglassOverview() {

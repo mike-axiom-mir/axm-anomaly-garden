@@ -65,6 +65,19 @@
       return sim;
     }
 
+    initializeModalSubworld(modalId, options) {
+      const sw = super.initializeModalSubworld(modalId, options);
+      this._normalizeGateFabric();
+      const zone = this._livingZone(modalId);
+      if (zone) this._refreshBaseline(zone);
+      return sw;
+    }
+
+    _restoreLivingBaseline(zone) {
+      super._restoreLivingBaseline(zone);
+      this._normalizeGateFabric();
+    }
+
     _normalizeGateFabric() {
       for (const zone of this.modalZones || []) {
         if (!zone.subworld) continue;

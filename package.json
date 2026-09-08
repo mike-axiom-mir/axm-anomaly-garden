@@ -1,0 +1,19 @@
+{
+  "name": "axm-anomaly-garden",
+  "version": "0.12.0",
+  "private": true,
+  "description": "Offline deterministic causal simulation playground.",
+  "scripts": {
+    "test": "node tests/sim.test.js && node tests/life.test.js && node tests/institutions.test.js && node tests/institution-actions.test.js && node tests/history.test.js && node tests/replication.test.js && node tests/containment.test.js && node tests/future-explorer.test.js && node tests/nested-modals.test.js && node tests/subworld-security.test.js",
+    "experiment:repair": "node tools/compare-repair-policies.js",
+    "study:repair": "node tools/batch-policy-study.js 24",
+    "study:institutions": "node tools/institution-study.js 24",
+    "study:institution-actions": "node tools/institution-action-study.js 24",
+    "study:history": "node tools/history-compaction-study.js",
+    "study:replication": "node tools/replication-study.js 24 120",
+    "study:containment": "node tools/containment-study.js 24 120",
+    "study:futures": "node tools/future-explorer-study.js",
+    "study:nested-modals": "node tools/nested-modal-study.js",
+    "study:subworld-security": "node tools/subworld-security-study.js 12 35"
+  }
+}

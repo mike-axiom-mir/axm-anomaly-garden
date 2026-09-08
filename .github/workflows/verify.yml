@@ -49,8 +49,14 @@ jobs:
         run: node --check src/v14.js
       - name: Syntax check v0.15 civilization extension
         run: node --check src/v15.js
+      - name: Syntax check v0.16 completion extension
+        run: node --check src/v16.js
+      - name: Syntax check v0.16 completion UI
+        run: node --check src/v16-ui.js
       - name: Syntax check browser controller
         run: node --check src/app.js
+      - name: Syntax check completion study
+        run: node --check tools/completion-study.js
       - name: Full deterministic regression suite
         run: npm test
       - name: Containment regression study
@@ -61,3 +67,5 @@ jobs:
         run: node tools/nested-modal-study.js
       - name: Subworld security regression study
         run: node tools/subworld-security-study.js 12 35
+      - name: Completion multi-seed stress study
+        run: node tools/completion-study.js 12 60

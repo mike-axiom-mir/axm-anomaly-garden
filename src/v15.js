@@ -67,6 +67,7 @@
       if (!zone || !zone.subworld) return;
       if (typeof this._normalizeEconomyZone === 'function') this._normalizeEconomyZone(zone);
       const sw = zone.subworld;
+      sw.lastBaselineRestoreWorldTick = Number(sw.lastBaselineRestoreWorldTick == null ? -1 : sw.lastBaselineRestoreWorldTick);
       sw.institutions = Array.isArray(sw.institutions) ? sw.institutions : [];
       if (!sw.institutions.length) {
         sw.institutions.push({
@@ -113,7 +114,12 @@
       if (saved.securityPolicy) zone.subworld.securityPolicy = clone(saved.securityPolicy);
       if (saved.institutions) zone.subworld.institutions = clone(saved.institutions);
       if (saved.inboundEvidence) zone.subworld.inboundEvidence = clone(saved.inboundEvidence);
+      zone.subworld.lastBaselineRestoreWorldTick = this.tick;
       this._normalizeCivilizationZone(zone);
+    }
+
+    _isBaselineRestoreTick(zone) {
+      return Boolean(zone && zone.subworld && Number(zone.subworld.lastBaselineRestoreWorldTick) === Number(this.tick));
     }
 
     initializeModalSubworld(modalId, options) {
@@ -246,9 +252,47 @@
       return report;
     }
 
+    _processLocalEconomies() {
+      for (const zone of (this.modalZones || []).filter((item) => item.active && item.subworld)) {
+        this._normalizeCivilizationZone(zone);
+        if (this._isBaselineRestoreTick(zone)) continue;
+        const sw = zone.subworld;
+        if (sw.tick > 0 && sw.tick % Number(this.config.subworldEconomyPeriod) === 0) {
+          const residents = sw.residents.slice().sort((a, b) => a.id.localeCompare(b.id));
+          for (const resident of residents) this.performSubworldTask(zone.id, resident.id, resident.occupation);
+        }
+        if (sw.tick > 0 && sw.tick % Number(this.config.subworldConsumptionPeriod) === 0 && sw.economy.lastConsumptionTick !== sw.tick) {
+          sw.economy.lastConsumptionTick = sw.tick;
+          const need = sw.residents.length;
+          const available = Number(sw.economy.stock.food || 0);
+          const consumed = Math.min(need, available);
+          sw.economy.stock.food = available - consumed;
+          const shortage = need - consumed;
+          if (shortage > 0) {
+            sw.economy.shortages += shortage;
+            this.metrics.subworldResourceShortages += shortage;
+            const affected = sw.residents.slice().sort((a, b) => a.id.localeCompare(b.id)).slice(0, shortage);
+            affected.forEach((resident) => { resident.discrepancy = clamp(Number(resident.discrepancy || 0) + 0.08, 0, 1.5); });
+            this._receipt('subworld.resource-shortage', {
+              modalId: zone.id,
+              resource: 'food',
+              need,
+              consumed,
+              shortage,
+              affectedResidentIds: affected.map((resident) => resident.id),
+              localTick: sw.tick
+            }, []);
+          } else {
+            this._receipt('subworld.resources-consumed', { modalId: zone.id, resource: 'food', amount: consumed, localTick: sw.tick }, []);
+          }
+        }
+      }
+    }
+
     _processResidentExperiments() {
       for (const zone of (this.modalZones || []).filter((item) => item.active && item.subworld)) {
         this._normalizeCivilizationZone(zone);
+        if (this._isBaselineRestoreTick(zone)) continue;
         const sw = zone.subworld;
         if (sw.tick <= 0 || sw.tick % Number(this.config.subworldInvestigationPeriod) !== 0) continue;
         for (const resident of sw.residents.slice().sort((a, b) => a.id.localeCompare(b.id))) {
@@ -263,6 +307,7 @@
     _processAssemblies() {
       for (const zone of (this.modalZones || []).filter((item) => item.active && item.subworld)) {
         this._normalizeCivilizationZone(zone);
+        if (this._isBaselineRestoreTick(zone)) continue;
         const sw = zone.subworld;
         const institution = sw.institutions[0];
         if (sw.tick > 0 && sw.tick % Number(this.config.subworldAssemblyPeriod) === 0 && institution.lastAssemblyTick !== sw.tick) this.conveneSubworldAssembly(zone.id);
@@ -306,6 +351,7 @@
     _recoverResources() {
       for (const zone of (this.modalZones || []).filter((item) => item.active && item.subworld)) {
         this._normalizeCivilizationZone(zone);
+        if (this._isBaselineRestoreTick(zone)) continue;
         const sw = zone.subworld;
         if (sw.tick <= 0 || sw.tick % Number(this.config.subworldResourceRecoveryPeriod) !== 0) continue;
         sw.economy.stock.energy = Number(sw.economy.stock.energy || 0) + 1;

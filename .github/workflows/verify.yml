@@ -47,6 +47,8 @@ jobs:
         run: node --check src/v13.js
       - name: Syntax check v0.14 economy/governance extension
         run: node --check src/v14.js
+      - name: Syntax check v0.15 civilization extension
+        run: node --check src/v15.js
       - name: Syntax check browser controller
         run: node --check src/app.js
       - name: Full deterministic regression suite

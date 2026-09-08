@@ -128,3 +128,13 @@ The feature lane ends at v0.16. Preserve these invariants when repairing the rep
 - pure observation: read-only Worldglass methods must not mutate canonical state
 
 Read [`AGENTS.md`](AGENTS.md) before contributing. The historical v0.12 lane record remains in [`LANE_001.md`](LANE_001.md); the final v0.13–v0.16 completion record is [`FINAL_HANDOFF.md`](FINAL_HANDOFF.md).
+
+## Animated Worldglass — September 2026
+
+The animation lane adds persistent, state-driven world markers and separate nested-world maps. Consecutive ticks interpolate between recorded positions; skipped ticks, rewinds and imported worlds snap to their recorded state. Anomaly and Modal animation plays while the world is running. Use **Motion → Reduced**, or the operating system's reduced-motion preference, to disable motion. Selecting a nested resident shows its recorded hypothesis and memory count.
+
+Living Matrix actions now refresh the main map and fingerprint immediately. Rendering never advances simulation time or consumes its RNG. The v0.16 engine rules are unchanged.
+
+`npm test` includes the dependency-free renderer regression. An optional DOM integration check can be run with `node tests/dom-integration.cjs` when `jsdom` is installed for development; `AXM_JSDOM_PATH` may point to an external installation. The app itself still opens offline without installing packages.
+
+These changes have DOM/logic verification; rendered motion and mobile visual quality remain unverified because the available cloud browser rejected the local preview URL.

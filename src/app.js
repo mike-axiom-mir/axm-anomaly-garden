@@ -181,66 +181,12 @@
     metricFingerprint.textContent = sim.stateFingerprint();
   }
 
-  function renderWorld() {
-    world.innerHTML = '';
-    world.style.setProperty('--cols', sim.config.width);
-    world.style.setProperty('--rows', sim.config.height);
-    for (let y = 0; y < sim.config.height; y += 1) {
-      for (let x = 0; x < sim.config.width; x += 1) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        world.appendChild(cell);
-      }
-    }
-    for (const place of sim.places) {
-      const marker = document.createElement('div');
-      marker.className = 'place-marker ' + place.type.replace(/[^a-z0-9_-]/gi, '-');
-      marker.style.gridColumn = place.x + 1;
-      marker.style.gridRow = place.y + 1;
-      marker.title = place.name + ' · ' + place.type;
-      marker.textContent = place.name.slice(0, 1).toUpperCase();
-      world.appendChild(marker);
-    }
-    for (const modal of sim.modalZones.filter(function (z) { return z.active; })) {
-      const marker = document.createElement('div');
-      marker.className = 'modal-marker';
-      marker.style.gridColumn = modal.x + 1;
-      marker.style.gridRow = modal.y + 1;
-      marker.title = modal.id + ' · period ' + modal.period + ' · iteration ' + modal.iteration;
-      marker.textContent = '↻';
-      world.appendChild(marker);
-    }
-    for (const anomaly of sim.anomalies.filter(function (a) { return a.active; })) {
-      const marker = document.createElement('div');
-      marker.className = 'anomaly ' + anomaly.kind;
-      marker.style.gridColumn = anomaly.x + 1;
-      marker.style.gridRow = anomaly.y + 1;
-      marker.title = anomaly.kind + ' · intensity ' + anomaly.intensity.toFixed(2) + ' · machine truth only';
-      world.appendChild(marker);
-    }
-    for (const node of sim.repairNodes) {
-      const repair = document.createElement('div');
-      repair.className = 'repair-node';
-      repair.style.gridColumn = node.x + 1;
-      repair.style.gridRow = node.y + 1;
-      repair.title = node.id + ' · ' + node.actions + ' repair actions';
-      repair.textContent = 'R';
-      world.appendChild(repair);
-    }
-    for (const agent of sim.agents) {
-      const person = document.createElement('button');
-      person.className = 'person';
-      if (agent.investigating) person.classList.add('investigating');
-      if (agent.awakened) person.classList.add('awakened');
-      if (agent.id === selectedAgentId) person.classList.add('selected');
-      person.style.gridColumn = agent.x + 1;
-      person.style.gridRow = agent.y + 1;
-      person.textContent = agent.name.slice(0, 1);
-      person.title = agent.name + ' · discrepancy ' + agent.discrepancy.toFixed(2);
-      person.addEventListener('click', function () { selectedAgentId = agent.id; render(); });
-      world.appendChild(person);
-    }
-  }
+  const worldRenderer = new window.AnomalyGardenWorldRenderer(world, function (id) {
+    selectedAgentId = id;
+    render();
+  });
+
+  function renderWorld() { worldRenderer.render(sim, selectedAgentId); }
 
   function renderTruth() {
     truthList.innerHTML = '';
@@ -389,5 +335,17 @@
   importFile.addEventListener('change', function () { importState(importFile.files && importFile.files[0]); });
   repairPolicy.addEventListener('change', function () { sim.setRepairPolicy(repairPolicy.value); setStatus('Repair policy changed to ' + sim.repairPolicy + ' and recorded as an intervention.'); render(); });
   document.querySelectorAll('[data-anomaly]').forEach(function (button) { button.addEventListener('click', function () { inject(button.dataset.anomaly); }); });
+  document.addEventListener('garden:refresh', render);
+  // Extension buttons finish their action before bubbling here; refresh the shared view.
+  document.addEventListener('click', function (event) {
+    const button = event.target.closest('button');
+    if (button && /^(completion-|subworld-|nested-|seed-replicator)/.test(button.id)) render();
+  });
+  document.addEventListener('change', function (event) {
+    if (['replication-policy', 'containment-policy'].includes(event.target.id)) render();
+  });
+  document.getElementById('motion').addEventListener('change', function (event) {
+    document.body.classList.toggle('reduced-motion', event.target.value === 'reduced');
+  });
   newSimulation();
 })();

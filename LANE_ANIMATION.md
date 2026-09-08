@@ -45,3 +45,5 @@ Mike identified that the animated diagram still did not look like a Matrix world
 Tests: 17 regression entrypoints PASS; optional DOM/fallback check PASS. Desktop and phone-width browser checks completed. Projection-only state changes preserved the visible fingerprint. No engine source was modified.
 
 Follow-up in the same PR lane: distinct landmark geometry and resident activity/position locator above architecture. All 17 suites and DOM integration pass. Browser preview verification blocked by URL security policy; no bypass attempted. Only renderer/presentation documentation changed; no engine changes or other PR lane overlap.
+
+Observed-change follow-up: city-signals.js compares detached render snapshots; bounded renderer cues expose investigation/model breaks, quarantine, glitches and actual action-counter increments. Added pure-delta and real-renderer lifecycle tests. All 18 entrypoints and DOM integration pass. Visual browser gate remains outstanding under the recorded policy restriction. Same branch/PR, no competing open PR found.

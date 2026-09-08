@@ -6,7 +6,7 @@
   class CityRenderer {
     constructor(canvas,onSelect,onEnter){
       this.canvas=canvas;this.ctx=canvas.getContext('2d');this.onSelect=onSelect;this.onEnter=onEnter;
-      this.scene=null;this.previous=new Map();this.targets=new Map();this.selected=null;this.follow=false;
+      this.signals=[];this.scene=null;this.previous=new Map();this.targets=new Map();this.selected=null;this.follow=false;
       this.mode='city';this.zoom=1;this.pan={x:0,y:0};this.hits=[];this.clock=0;this.running=false;this.reduced=false;this.frames=[];this.cadence=[];
       this.width=1200;this.height=650;this.last=0;this.changeAt=0;this.dead=false;
       this.resize=new ResizeObserver(entries=>{const r=entries[0].contentRect;this.width=r.width;this.height=r.height;const d=Math.min(window.devicePixelRatio||1,1.5);canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);this.dpr=d;this.draw(performance.now());});
@@ -22,6 +22,9 @@
     }
     setScene(scene){
       const reset=!this.scene||this.scene.key!==scene.key||this.scene.seed!==scene.seed||scene.tick<this.scene.tick;
+      const observedAt=performance.now();
+      if(reset)this.signals=[];
+      else this.signals=this.signals.filter(s=>observedAt-s.at<2400).concat(root.AnomalyGardenCitySignals.changes(this.scene,scene).map(s=>({...s,at:observedAt}))).slice(-24);
       if(reset){this.previous.clear();this.targets.clear();this.pan={x:0,y:0};this.zoom=this.width<620?1.4:1;this.selected=null;this.clock=0;}
       if(reset||scene.tick!==this.scene.tick){
         const smooth=!reset&&scene.tick===this.scene.tick+1;
@@ -162,6 +165,20 @@
       c.restore();
       if(this.mode==='code')this.label(a.quarantined?'QUARANTINED':repair?'REPAIR':a.role||a.kind,{x:p.x,y:p.y-35*k},color,9);
     }
+    drawSignals(now){
+      const c=this.ctx,k=Math.max(.7,this.scale);
+      const colors={break:'#d4a8ff',inquiry:'#f4d08f',quarantine:'#99b8ff',repair:'#aaffd1',program:'#e7b695',glitch:'#83ffb3'};
+      this.signals=this.signals.filter(s=>now-s.at<2400);
+      for(const [i,s] of this.signals.entries()){
+        const age=Math.max(0,now-s.at)/2400,p=this.point(s.x,s.y),color=colors[s.kind];
+        c.save();c.globalAlpha=this.reduced?1:Math.min(1,(1-age)*3);
+        const radius=(this.reduced?20:12+age*36)*k;
+        c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.ellipse(p.x,p.y,radius,radius*.5,0,0,Math.PI*2);c.stroke();
+        // Limit labels while keeping every bounded position pulse visible.
+        if(i>=this.signals.length-4)this.label(s.label,{x:p.x,y:p.y-(65+(this.reduced?0:age*20))*k},color,10);
+        c.restore();
+      }
+    }
     draw(now){
       if(!this.ctx||!this.scene||!this.width)return;
       const c=this.ctx,s=this.scene,w=this.width,h=this.height;c.setTransform(this.dpr||1,0,0,this.dpr||1,0,0);c.clearRect(0,0,w,h);
@@ -184,6 +201,7 @@
         c.font='11px monospace';c.textAlign='left';for(let i=0;i<Math.ceil(w/24);i++){const n=hash(s.seed+':code:'+i);for(let j=0;j<6;j++){const y=(n%h+this.clock*.032+j*19)%h;c.fillStyle=j===5?'#b3ffc966':'#48b36d24';c.fillText(String((n+j+s.tick)%2),i*24,y);}}
       }else if(!this.reduced){c.strokeStyle='#aeffd010';for(let i=0;i<65;i++){const n=hash('rain:'+i),x=n%w,y=(n%h+this.clock*.12)%h;this.line({x,y},{x:x-2,y:y+9},'#a2ffc215');}}
       const vignette=c.createRadialGradient(w*.5,h*.5,h*.15,w*.5,h*.5,Math.max(w,h)*.7);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#010604bb');c.fillStyle=vignette;c.fillRect(0,0,w,h);
+      this.drawSignals(now);
       this.tracking(now);
       c.fillStyle='#9ab7a9';c.font='11px ui-monospace,monospace';c.textAlign='left';c.fillText(w<620?'DRAG TO PAN · USE + / −':'DRAG TO PAN  /  CTRL + SCROLL TO ZOOM  /  SELECT A RESIDENT',20,h-20);
       if(w>=620){c.textAlign='right';c.fillText(this.mode==='code'?'CODE EXPRESSION':'CITY EXPRESSION',w-20,h-20);}

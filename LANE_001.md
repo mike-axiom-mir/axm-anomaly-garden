@@ -20,104 +20,123 @@ Grow one truthful playable causal world without rebuilding or splitting this cha
 - v0.8 locally-valid machine replication vs global shared-load viability
 - v0.9 lineage-preserving quarantine with retained occupied cells and no deletion
 - v0.10 Future Explorer with world-digest comparison, first-intervention divergence, no-loss archived-future forking, and same-intervention drift alarms
-- v0.11 nested Modal/subworld fabric with local clocks, bounded local state, parent-reset cascades, and cross-layer memory evidence
+- v0.11 nested Modal fabric with local clocks, bounded local state, parent-reset cascades, and cross-layer memory evidence
+- v0.12 living nested subworlds with local residents/anomalies/programs plus bounded security-program ecology
 - offline Worldglass browser build; no account/cloud/AI/network requirement at runtime
 
-## v0.11 change boundary — nested Modals
+## v0.12 change boundary — living subworld + security ecology
 
-Root Modal behavior remains unchanged. v0.11 only adds child layers on top.
+v0.12 stays additive over v0.11. Root and nested Modal clock/reset semantics remain underneath it. A living subworld is initialized explicitly on an existing nested Modal rather than silently changing every Modal.
 
-A nested Modal:
+A living nested subworld owns:
 
-- must fit completely inside an active parent Modal
-- has explicit `parentModalId` and `depth`
-- is bounded to depth 3 by default
-- owns `localTick`, local entity coordinates, local reset iteration, lifetime reset count, and parent-reset count
-- advances only through the nested Modal fabric rather than the old root reset loop
-- uses hash-derived deterministic local motion/leak entropy and does not directly consume the parent simulation RNG
-- restores its local entity baseline on its own period reset
-- resets to its captured baseline when its parent resets
-- recursively resets descendants when an enclosing layer resets
-- emits ordinary `world.modal-reset` receipts with `nested`, `depth`, `parentModalId`, and explicit `cause`
-- sends surviving memory fragments into the existing `inhabitant.modal-memory-leak` evidence path with nested-layer provenance
-- remains part of serialized canonical state and therefore participates in Future Explorer world-digest comparison
+- bounded local grid
+- deterministic local residents with local perception, memory, discrepancy, investigation and model-break state
+- local anomalies
+- local machine programs
+- locally-valid local replication
+- reset-to-seeded-baseline state when the enclosing Modal resets
+- global causal receipts for major local transitions so reset does not erase history
+- evidence leakage into the existing outer `inhabitant.modal-memory-leak` path only through an explicit deterministic leak gate
 
-The browser adds a **Nest Modal** action and a Modal Tree panel showing depth, local clocks, loop counts, lifetime resets, anchors, parent cascades, and deeper memory leaks.
+### Bounded Agent/security programs
 
-## GitHub-measured nested fixture
+Security roles are capability bundles rather than omniscient controllers:
 
-`node tools/nested-modal-study.js` builds:
+- `observer` → observe only
+- `warden` → observe + quarantine programs
+- `repairer` → observe + repair anomalies
+- `custodian` → both action capabilities
 
-```text
-modal-001 / root        period 12
-  └─ modal-002 / child  period 7
-      └─ modal-003      period 5
-```
+A security action is admitted only if all gates pass:
 
-and runs 96 ticks.
+1. **jurisdiction** — same Modal subworld
+2. **capability** — role actually owns the action
+3. **knowledge** — target has been observed by that program
+4. **range** — target is inside action radius
 
-GitHub Actions run #24 measured:
+Blocked attempts receive `security.action-blocked` receipts with the failed gate. Program quarantine is no-loss: the target remains retained with lineage and `deletionCount: 0`.
 
-- root iterations: **8**
-- nested Modals created: **2**
-- nested resets: **40**
-- local-period nested resets: **16**
-- parent-cascade nested resets: **24**
-- nested memory leaks into outer inhabitants: **9**
-- total Modal resets including root: **48**
-- final modeled-world digest: `e45c0de6`
-- final full state fingerprint: `51b99135`
+Worldglass adds a living-subworld panel with controls to initialize a nested local world, seed a local anomaly/replicator, and deploy bounded warden/repairer programs.
 
-The child finished with 16 lifetime resets / 8 parent resets. The grandchild finished with 24 lifetime resets / 16 parent resets. Their local clocks were at zero at tick 96 because the root reset on that tick and cascaded inward.
+## GitHub-measured v0.12 comparison
 
-These are fixture results for this ruleset only, not claims about reality or nested simulation metaphysics.
+`node tools/subworld-security-study.js 12 35`
+
+Each of 12 seeds contains 4 local residents, one strong local anomaly, and one denied replicator. Only the security condition changes.
+
+| Average at tick 35 | No security | Bounded security |
+| --- | ---: | ---: |
+| active programs | 3.00 | 2.00 |
+| quarantined programs | 0.00 | 1.00 |
+| active anomalies | 1.00 | 0.00 |
+| local program copies | 32.00 | 1.00 |
+| local resident observations | 12.00 | 9.33 |
+| local investigations | 0.00 | 0.00 |
+| local model breaks | 0.00 | 0.00 |
+| security observations | 0.00 | 12.42 |
+| security actions | 0.00 | 10.00 |
+| evidence leaks outward | 3.42 | 2.67 |
+
+Sample world digests:
+
+- no security: `49fc8c00`
+- bounded security: `ac5835fa`
+
+The measured result supports only a narrow claim inside this ruleset: bounded security strongly reduced the denied local replication and repaired the seeded anomaly. It does **not** support a claim that security prevented local investigations/model breaks, because both conditions measured zero of those transitions.
+
+See `EXPERIMENTS/SUBWORLD_SECURITY_STUDY_001.md`.
 
 ## Verification
 
-GitHub Actions run #24: **PASS**.
+GitHub Actions run #34 on head `33edd06...`: **PASS**.
 
 It ran:
 
-- syntax checks through v0.11 and all browser helpers
-- full deterministic regression suite across **nine suites**
+- syntax checks through v0.12 and browser helpers
+- full deterministic regression suite across **ten suites**
 - containment regression study
 - Future Explorer regression study
 - nested Modal regression study
+- living-subworld/security comparison study
 
-The v0.11 tests cover:
+The v0.12 tests cover:
 
-- parent/child creation linkage
-- fit constraint and max-depth rejection
-- no direct parent RNG consumption for explicit nested creation/local execution source
-- deterministic same-seed nested continuation
-- local resets and parent-reset cascades
-- causal parent links on nested reset receipts
-- serialization/restore equality
-- deterministic continuation after restore
-- Modal tree equality after round-trip
+- deterministic same-seed living-subworld continuation
+- nested-only initialization boundary
+- local anomaly evidence receipts
+- explicit capability denial
+- cross-Modal jurisdiction denial
+- no-omniscience / target-not-observed gate
+- action-range denial
+- no-loss program quarantine
+- repairer/warden capability separation
+- executable local replication
+- Modal reset restoring seeded local state without erasing history
+- exact serialization and deterministic continuation
 
 ## Deliberate non-claims
 
-No sentience, consciousness, literal awakening, real-world social law, literal future prediction, or evidence that physical reality is simulated is claimed.
+No sentience, consciousness, literal awakening, real-world social law, literal future prediction, evidence that physical reality is simulated, or universal security theorem is claimed.
 
-A v0.11 nested Modal is still a **bounded nested-state foundation**, not a full duplicate civilization. It currently proves independent local clocks, local entity state, reset ancestry, and cross-layer memory evidence. It does not yet run independent nested institutions, economies, full local geography, or complete living populations.
+The v0.12 local residents are bounded simulation actors. Security roles, sensing ranges, anomaly effects, replication periods, reset rules, and thresholds are explicit model choices.
 
 ## Browser truth boundary
 
-The v0.11 browser scripts pass syntax checks and are wired into `index.html`, but the earlier container Chromium/DBus problem still prevents a trustworthy real-browser visual smoke claim. Engine behavior is verified; visual/runtime polish remains a separate gate.
+The v0.12 browser scripts pass syntax checks and are wired into `index.html`, but the earlier container Chromium/DBus problem still prevents a trustworthy real-browser visual smoke claim. Engine behavior is verified; visual/runtime polish remains a separate gate.
 
-## Known limitations / next Matrix deepening
+## Next Matrix deepening
 
-1. Deepen nested Modals from local entity snapshots into richer subworld state: local anomalies, programs, bounded inhabitants, and optional local rule overrides without granting hidden outer-world truth.
-2. Add Agent/security-program ecology: machine programs that enforce local constraints from bounded capabilities rather than an omniscient global controller.
-3. Deepen inhabitant experiments so methods can be repeated, compared, taught, challenged, and improved from prior evidence.
-4. Deepen institutions into factions, membership changes, dissent, evidence challenge, and proposal outcomes while preserving voluntary participation and bounded knowledge.
-5. Deepen the lived city layer: richer trade/resource chains, ownership transfer, infrastructure, leisure, households/families, and projects that alter shared space.
-6. Deepen replication beyond quarantine with competing programs, resource recovery, containment timing, and Future Explorer branch comparison.
-7. Add spatial causal/relationship overlays and stronger branch-tree visualization.
+1. Let bounded local residents/programs cross between compatible Modal layers through explicit gates rather than teleporting state.
+2. Add richer Agent/security ecology: multiple jurisdictions, handoff/escalation, competing policies, limited budgets, and appeal/repair paths without a single global controller.
+3. Give nested subworlds richer local tasks/resources and small economies without duplicating the entire outer civilization engine at once.
+4. Deepen inhabitant experiments so methods can be repeated, taught, challenged, and improved from prior evidence.
+5. Deepen institutions into factions, dissent, evidence challenge, membership changes, and proposal outcomes while preserving bounded knowledge.
+6. Deepen replication beyond quarantine with competing programs, resource recovery, containment timing, and Future Explorer comparison.
+7. Add stronger spatial causal/relationship overlays and branch-tree visualization.
 8. Continue scaling: checkpoint compaction, causal paging, archived-branch compression, and larger populations.
-9. Later, once the Matrix layer is deeper, return to Baseline Lab / Future Envelope for externally sourced scenario work with provenance, backtesting, and sensitivity analysis.
-10. Keep the Foundation Planet / Grammar Glass / Holodeck integration as a separate weekend architecture experiment; do not contaminate this Matrix lane with Planet implementation work.
+9. Later return to Baseline Lab / Future Envelope for sourced scenario work with provenance/backtesting/sensitivity analysis.
+10. Keep Foundation Planet / Grammar Glass / Holodeck integration as the separate weekend architecture experiment; do not contaminate this Matrix lane with Planet implementation work.
 
 ## Lane discipline
 

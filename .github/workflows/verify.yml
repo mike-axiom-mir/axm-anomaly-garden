@@ -39,6 +39,10 @@ jobs:
         run: node --check src/v11.js
       - name: Syntax check v0.11 nested Modal UI
         run: node --check src/v11-ui.js
+      - name: Syntax check v0.12 living subworld/security extension
+        run: node --check src/v12.js
+      - name: Syntax check v0.12 living subworld/security UI
+        run: node --check src/v12-ui.js
       - name: Syntax check browser controller
         run: node --check src/app.js
       - name: Full deterministic regression suite
@@ -49,3 +53,5 @@ jobs:
         run: node tools/future-explorer-study.js
       - name: Nested Modal regression study
         run: node tools/nested-modal-study.js
+      - name: Subworld security regression study
+        run: node tools/subworld-security-study.js 12 35

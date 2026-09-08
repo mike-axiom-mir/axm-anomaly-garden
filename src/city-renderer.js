@@ -79,10 +79,43 @@
       for(const a of s.anomalies){const p=this.point(a.x,a.y);const r=(a.radius||1)*this.unit*.52;c.save();c.translate(p.x,p.y);c.scale(1,.5);const g=c.createRadialGradient(0,0,1,0,0,r);g.addColorStop(0,'#98ffa044');g.addColorStop(1,'#75ffba00');c.fillStyle=g;c.beginPath();c.arc(0,0,r,0,Math.PI*2);c.fill();c.restore();}
     }
     building(b){
-      const x=b.x-.78,y=b.y-.78;const color=b.type==='home'?'#b3d8a24d':b.id.includes('observatory')?'#65ffc299':'#beeaa377';
-      if(b.name==='Park'){this.box(x,y,.57,.57,7,'#2f7849','park');for(let i=0;i<3;i++){const p=this.point(x+.12+i*.16,y+.25,18);this.line(p,{x:p.x,y:p.y+12*this.scale},'#668863',3);const c=this.ctx;c.fillStyle='#3c7453';c.beginPath();c.ellipse(p.x,p.y,8*this.scale,11*this.scale,0,0,Math.PI*2);c.fill();}}
-      else {this.box(x,y,.58,.57,b.height,color);const p=this.point(x+.3,y+.57,b.height+4);if(b.type!=='home')this.label(b.name.toUpperCase(),p,'#d6f0b9',Math.max(9,10*this.scale));}
-      const lamp=this.point(b.x-.18,b.y+.16,25);this.line(lamp,this.point(b.x-.18,b.y+.16),'#688c7966',1.5*this.scale);const c=this.ctx;c.fillStyle='#b5f3b6';c.shadowColor='#91ffc1';c.shadowBlur=7;c.fillRect(lamp.x-2,lamp.y-2,4,2);c.shadowBlur=0;
+      const x=b.x-.78,y=b.y-.78,c=this.ctx,k=this.scale;
+      const color=b.type==='home'?'#b3d8a24d':'#beeaa377';
+      const roof=(z,fill)=>this.poly([this.point(x-.05,y-.05,z),this.point(x+.65,y-.05,z),this.point(x+.65,y+.65,z),this.point(x-.05,y+.65,z)],fill,'#719b83');
+      let top=b.height;
+      if(b.name==='Park'){
+        top=32;this.box(x,y,.57,.57,7,'#2f7849','park');
+        for(let i=0;i<3;i++){const p=this.point(x+.12+i*.16,y+.25,20+i*3);this.line(p,{x:p.x,y:p.y+16*k},'#668863',3*k);c.fillStyle=i%2?'#508862':'#3c7453';c.beginPath();c.ellipse(p.x,p.y,8*k,11*k,0,0,Math.PI*2);c.fill();}
+      }else if(b.name==='Observatory'){
+        top=102;this.box(x,y,.58,.57,72,'#65ffc299');
+        const p=this.point(x+.29,y+.29,72);c.fillStyle='#648e7a';c.strokeStyle='#b1d6bd';c.beginPath();c.ellipse(p.x,p.y,20*k,23*k,0,Math.PI,Math.PI*2);c.closePath();c.fill();c.stroke();
+        this.line({x:p.x-4*k,y:p.y-17*k},{x:p.x+24*k,y:p.y-32*k},'#c3dfce',5*k);
+      }else if(b.name==='Market'||b.name==='Cafe'){
+        top=34;this.box(x,y,.58,.57,22,color);roof(27,'#718c62');
+        for(let i=0;i<5;i++)this.poly([this.point(x+i*.12,y+.57,27),this.point(x+(i+1)*.12,y+.57,27),this.point(x+(i+1)*.12,y+.73,22),this.point(x+i*.12,y+.73,22)],i%2?'#b5c896':'#345d48');
+        if(b.name==='Cafe'){const p=this.point(x+.8,y+.35,8);c.fillStyle='#b6c7a0';c.beginPath();c.ellipse(p.x,p.y,7*k,3*k,0,0,Math.PI*2);c.fill();this.line(p,this.point(x+.8,y+.35),'#79957e',2*k);}
+      }else if(b.name==='Station'){
+        top=43;this.box(x,y,.58,.57,9,color);
+        for(const dx of [0,.56])for(const dy of [0,.56])this.line(this.point(x+dx,y+dy,9),this.point(x+dx,y+dy,36),'#a4c4ac',2*k);
+        roof(36,'#3e6858');roof(40,'#507c66');
+        this.line(this.point(x,y+.22,10),this.point(x+.58,y+.22,10),'#d2dbc1',2*k);
+      }else if(b.name==='Workshop'||b.name==='Repair Depot'){
+        top=62;this.box(x,y,.58,.57,38,color);
+        for(let i=0;i<3;i++)this.box(x+i*.18,y,.15,.57,44+i%2*7,'#83a98d','park');
+        this.box(x+.38,y+.1,.12,.12,60,'#94c8aa','park');
+      }else this.box(x,y,.58,.57,b.height,color);
+      if(b.type!=='home')this.label(b.name.toUpperCase(),this.point(x+.3,y+.57,top+8),'#d6f0b9',Math.max(9,10*k));
+      const lamp=this.point(b.x-.18,b.y+.16,25);this.line(lamp,this.point(b.x-.18,b.y+.16),'#688c7966',1.5*k);c.fillStyle='#b5f3b6';c.shadowColor='#91ffc1';c.shadowBlur=7;c.fillRect(lamp.x-2,lamp.y-2,4,2);c.shadowBlur=0;
+    }
+    tracking(now){
+      const a=this.scene.people.find(p=>p.id===this.selected);if(!a)return;
+      const q=this.position(a,now),p=this.point(q.x,q.y),k=Math.max(.7,this.scale),c=this.ctx;
+      // A screen-space locator stays visible over foreground architecture; it is not another inhabitant.
+      const peers=this.scene.people.filter(v=>v.x===a.x&&v.y===a.y);
+      p.x+=(peers.findIndex(v=>v.id===a.id)-(peers.length-1)/2)*7*k;
+      c.save();c.setLineDash([2,4]);this.line(p,{x:p.x,y:p.y-48*k},'#bcffcc99');c.setLineDash([]);
+      c.strokeStyle='#d0ffdc';c.lineWidth=1.5;c.beginPath();c.ellipse(p.x,p.y,12*k,5*k,0,0,Math.PI*2);c.stroke();
+      this.label((this.mode==='code'?a.id:a.name)+' · '+a.activity,{x:p.x,y:p.y-51*k},'#d0ffdc',11);c.restore();
     }
     person(a,now){
       const c=this.ctx,p0=this.position(a,now),p=this.point(p0.x,p0.y);const k=Math.max(.7,this.scale);
@@ -100,7 +133,7 @@
       c.fillStyle=hue;c.beginPath();c.arc(0,-21,3.2,0,Math.PI*2);c.fill();c.fillStyle='#12201c';c.fillRect(-3,-25,6,2);
       if(a.investigating||a.awakened){c.fillStyle=hue;c.font='11px monospace';c.textAlign='center';c.fillText(a.awakened?'◇':'?',0,-31);}
       c.restore();
-      if(selected)this.label(this.mode==='code'?a.id:a.name,{x:p.x,y:p.y-35*k},hue,11);
+
       this.hits.push({id:a.id,x:p.x,y:p.y-12*k,radius:Math.max(16,15*k)});
       if(selected&&a.target&&this.mode==='code'){c.setLineDash([3,5]);this.line(p,this.point(a.target.x,a.target.y),'#99ffc655');c.setLineDash([]);}
     }
@@ -151,6 +184,7 @@
         c.font='11px monospace';c.textAlign='left';for(let i=0;i<Math.ceil(w/24);i++){const n=hash(s.seed+':code:'+i);for(let j=0;j<6;j++){const y=(n%h+this.clock*.032+j*19)%h;c.fillStyle=j===5?'#b3ffc966':'#48b36d24';c.fillText(String((n+j+s.tick)%2),i*24,y);}}
       }else if(!this.reduced){c.strokeStyle='#aeffd010';for(let i=0;i<65;i++){const n=hash('rain:'+i),x=n%w,y=(n%h+this.clock*.12)%h;this.line({x,y},{x:x-2,y:y+9},'#a2ffc215');}}
       const vignette=c.createRadialGradient(w*.5,h*.5,h*.15,w*.5,h*.5,Math.max(w,h)*.7);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#010604bb');c.fillStyle=vignette;c.fillRect(0,0,w,h);
+      this.tracking(now);
       c.fillStyle='#9ab7a9';c.font='11px ui-monospace,monospace';c.textAlign='left';c.fillText(w<620?'DRAG TO PAN · USE + / −':'DRAG TO PAN  /  CTRL + SCROLL TO ZOOM  /  SELECT A RESIDENT',20,h-20);
       if(w>=620){c.textAlign='right';c.fillText(this.mode==='code'?'CODE EXPRESSION':'CITY EXPRESSION',w-20,h-20);}
     }

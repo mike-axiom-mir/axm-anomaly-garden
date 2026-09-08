@@ -35,3 +35,9 @@ All new visual geometry and animation are original procedural drawing code autho
 ## Scope
 
 This is a stylized 2.5D simulation world, not a movie-quality 3D city. Street-level free-roaming cameras, detailed character assets, interiors and sound are not implemented. The new renderer is a real world realization of the existing model, while the deterministic simulation body remains v0.16.
+
+## Landmark/readability follow-up
+
+Distinct procedural landmarks now include an observatory dome and telescope, striped market/cafe awnings, a cafe table, an open station canopy, industrial roof sections and park trees. These remain presentation geometry, not new simulation facilities or actions. The selected resident has a screen-space locator drawn above architecture, with their actual current activity, so foreground buildings cannot hide the tracking cue.
+
+Validation: renderer syntax check, all 17 regression entrypoints and optional DOM integration passed. Live rendered verification was attempted through the managed preview but rejected by the browser URL security policy; no alternate route was attempted. Appearance and motion of this follow-up therefore remain unverified in a live browser. Prior screenshots apply to the preceding revision only. Next useful check: review landmark label collisions and the tracking cue at phone width and maximum zoom.

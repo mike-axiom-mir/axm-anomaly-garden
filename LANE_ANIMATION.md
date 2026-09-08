@@ -43,3 +43,5 @@ This follow-up supersedes the earlier blanket rendered-browser limitation; the o
 Mike identified that the animated diagram still did not look like a Matrix world and requested analysis followed by building. The same branch/PR now contains an isometric world-first realization, articulated inhabitants, architecture, atmospheric/code expressions, visible programs/glitches/portals, camera controls, living-subworld navigation and a preserved expandable lab. See CITY_REALIZATION.md for assessment, implementation boundaries and browser evidence.
 
 Tests: 17 regression entrypoints PASS; optional DOM/fallback check PASS. Desktop and phone-width browser checks completed. Projection-only state changes preserved the visible fingerprint. No engine source was modified.
+
+Follow-up in the same PR lane: distinct landmark geometry and resident activity/position locator above architecture. All 17 suites and DOM integration pass. Browser preview verification blocked by URL security policy; no bypass attempted. Only renderer/presentation documentation changed; no engine changes or other PR lane overlap.

@@ -2,180 +2,94 @@
 
 > Build a world. Disturb one thing. See what notices.
 
-Anomaly Garden is a playful, inspectable simulation lab. It separates **machine truth** from **inhabitant perception**, lets the player alter conditions without scripting the final outcome, and records causal receipts so surprising events can be traced backward.
+Anomaly Garden is an offline deterministic causal simulation lab. It separates machine truth from inhabitant perception, preserves causal receipts and abandoned futures, and grows by additive layers rather than pretending every new mechanic was always present.
 
-The current build is deliberately offline and dependency-free in the browser: open `index.html`. No account, server, package manager, AI service, or internet connection is required.
+The browser build has no runtime account, cloud, AI service, package manager, or internet requirement: open `index.html`.
 
-## Current executable systems
+## Current executable stack
 
-### Deterministic world
+- deterministic seeded world + exact RNG save/restore
+- 16 outer inhabitants with homes, roles, work, needs, credits, inventory, projects, relationships, institutions, memories, investigations and model-break transitions
+- local anomalies and inhabitant-authored tests
+- root Modals with repeating resets and receipted memory leakage
+- repair programs with off/tolerant/aggressive policies
+- checkpoints, rewind, abandoned-future preservation, exact JSON export/import
+- exact hot/cold causal history and ancestry lookup
+- v0.8 locally-valid machine replication vs shared global viability
+- v0.9 lineage-preserving quarantine
+- v0.10 Future Explorer with world-digest comparison, intervention divergence, drift alarms, and no-loss archived-future forking
+- v0.11 nested Modals with independent local clocks and parent-reset cascades
+- v0.12 living nested subworlds with bounded local residents, local anomalies/programs, local replication, and jurisdiction-limited security programs
 
-- seeded pseudo-random world generation
-- 16 inhabitants with measurable curiosity, skepticism, social tendency, confidence, discrepancy, and investigation thresholds
-- state fingerprint for exact branch/control-state comparison
-- separate v0.10 **world digest** for modeled-world comparison without branch/receipt administration
-- exact RNG state is serializable, so an imported world can continue deterministically from the saved point
-- abandoned futures created by rewind are retained in a branch archive instead of silently disappearing
-- a 48-tick day cycle gives inhabitants persistent homes, roles, workplaces, social destinations, energy, social need, and planned activities
+## v0.12 — living nested subworlds
 
-### Lived routine layer
+A living subworld is initialized explicitly on an already-existing nested Modal. It owns a bounded local grid, deterministic local residents, local anomalies, local machine programs, and a seeded local baseline that is restored when the enclosing Modal resets.
 
-- each inhabitant has a persistent home and role
-- roles map to shared workplaces such as the Workshop, Observatory, Market, Repair Depot, Station, and Park
-- every day cycles through rest, work, social, and home phases
-- inhabitants move toward their current routine destination instead of random-walking by default
-- investigation can pull an inhabitant away from the planned routine, and that deviation is counted in state
-- energy and social need change with current activity and remain bounded state variables
-- workplaces hold real resource stock and accumulate production from inhabitants who reach scheduled work
-- inhabitants earn/spend credits, own/consume food, and carry inspectable inventory state
-- every inhabitant carries a role-shaped multi-day project; completion creates a persistent owned artifact
-- repeated social encounters become persistent meeting events that strengthen familiarity/trust
+Important local transitions still write to the outer causal ledger, so a reset does not erase history.
 
-### Perception and model change
+Local resident state currently includes:
 
-- local anomaly interventions: `gravity-slip`, `loop-echo`, `time-pocket`, `memory-scar`
-- targeted `whisper` intervention against the selected inhabitant
-- inhabitants can encounter, notice, or miss anomaly evidence
-- discrepancy can accumulate or decay
-- inhabitants can enter an investigation state
-- investigators can run their own anomaly/Modal tests, producing receipted confirmatory or inconclusive evidence
-- a defined threshold can produce a **model break**: `world-model-is-incomplete`
-- this is a simulation state transition, not a claim of literal awakening or self-awareness
+- position
+- curiosity / skepticism
+- confidence / discrepancy
+- local memory
+- investigation threshold
+- investigating state
+- local model-break state
 
-### Persistent social fabric
+Local anomaly evidence does **not** automatically become outer-world knowledge. Evidence can cross outward only through the explicit deterministic subworld-memory leak path into the existing `inhabitant.modal-memory-leak` mechanism.
 
-- every inhabitant is connected to a durable relationship topology
-- relationship edges carry trust, familiarity, signal counts, and repeated-meeting history
-- anomaly information propagates only through existing relationships and local encounter distance
-- successful exchanges alter the persistent relationship state
+## Bounded Agent / security-program ecology
 
-### Bounded institutions + voluntary proposals
+Security is modeled as multiple local programs, not one omniscient controller.
 
-- three institutions exist: Inquiry Circle, Maintenance Guild, and Commons Assembly
-- each inhabitant belongs to one institution with a persistent trust value
-- institutions **do not receive raw anomaly objects or Worldglass machine truth**
-- they receive rate-limited, source-linked member reports derived from observations, Modal memory, tests, or social testimony
-- each institution accumulates evidence and changes its own narrative using different explicit thresholds/frames
-- institutions periodically broadcast their current interpretation to members, which can modestly affect confidence/discrepancy
-- a non-prior narrative can generate a temporary action proposal without receiving machine truth
-- members accept proposals probabilistically from their own trust/needs/traits; acceptance is never guaranteed and the whole action layer has an explicit off switch
-- accepted participation is phase-bounded, and personal investigation can still override it
-- every report, narrative change, proposal, acceptance, session, and commitment end is causally inspectable
+Roles:
 
-### Locally valid replication vs global viability
+- `observer`: observe only
+- `warden`: observe + quarantine programs
+- `repairer`: observe + repair anomalies
+- `custodian`: both action capabilities
 
-- v0.8 adds an optional machine-layer replicator experiment; it is **off by default**
-- a player can seed one replicator and choose `off`, `bounded`, or `open` copy admission
-- every accepted copy must pass the local transition rules: active parent, in-bounds empty target cell, hard instance limit
-- bounded admission refuses a locally possible copy when projected shared system load would exceed the configured budget
-- open admission accepts locally valid copies beyond that budget; sustained excess load can generate receipted `silent-zone` strain anomalies
-- copy receipts link each child to its parent creation receipt, making the replication tree inspectable
-- the machine layer exposes shared load and a simple viability metric; those are explicit simulation mechanics, not claims about real computation or biology
+Every action must pass four gates:
 
-The fixed 24-seed / 120-tick study is recorded in `EXPERIMENTS/REPLICATION_STUDY_001.md`. In that exact model, bounded runs stabilized at 21 programs / 0.63 load with zero strain events, while open runs reached 45 programs / 1.35 load and generated 17 strain anomalies per run.
+1. **jurisdiction** — target belongs to the same Modal subworld
+2. **capability** — that security role owns the requested action
+3. **knowledge** — that security program has actually observed the target
+4. **range** — target is within action radius
 
-### Lineage-preserving quarantine
+A failed gate creates a `security.action-blocked` receipt. Quarantine preserves the target program and its lineage; receipts explicitly record `deletionCount: 0`.
 
-- v0.9 adds an optional `quarantine` containment policy; it is **off by default**
-- containment reacts only after repeated machine-layer strain has already occurred
-- contained replicators keep their id, parent, generation, position, and creation receipt
-- quarantined copies become inactive for replication/load but remain retained in lineage and keep their occupied cells
-- containment-cycle receipts explicitly record `deletionCount: 0`
-- early strain remains in the causal history rather than being retroactively erased
+This is intentionally different from giving an Agent magical access to all simulator state.
 
-The GitHub-measured 24-seed / 120-tick study is recorded in `EXPERIMENTS/CONTAINMENT_STUDY_001.md`. In that exact model, open replication without containment ended at 45 active programs / 1.35 load / 0.32 viability / 17.00 strain events, while quarantine averaged 21 active + 35.38 quarantined / 0.63 active load / 0.93 viability / 3.29 strain events.
+## GitHub-measured v0.12 fixture
 
-### Future Explorer
+`node tools/subworld-security-study.js 12 35`
 
-v0.10 turns the preserved branch archive into an executable causal comparison layer.
+Each seed contains 4 local residents, one strong `local-distortion`, and one denied local replicator. Only the security condition changes.
 
-- lists the current future plus every retained archived future
-- gives each future a full state fingerprint and a separate modeled-world digest
-- compares two futures' ordered **non-administrative intervention logs**
-- identifies the first differing intervention and its actual receipt id
-- reports metric differences across investigations, model breaks, production, meetings, projects, strain, and containment
-- if tracked interventions are identical but world digests differ, reports `state-divergence-with-same-interventions` instead of inventing a cause
-- if world digests match but full fingerprints differ, reports `administrative-divergence`
-- can fork an archived future back into canonical play
-- before a fork, the previous current future is archived as another retained branch
-- the source archived future is not consumed or deleted by forking
-- fork/archive receipts record `deletionCount: 0`
-- forked states survive export/import and continue deterministically
+| Average at tick 35 | No security | Bounded security |
+| --- | ---: | ---: |
+| active programs | 3.00 | 2.00 |
+| quarantined programs | 0.00 | 1.00 |
+| active anomalies | 1.00 | 0.00 |
+| local program copies | 32.00 | 1.00 |
+| local resident observations | 12.00 | 9.33 |
+| local investigations | 0.00 | 0.00 |
+| local model breaks | 0.00 | 0.00 |
+| security observations | 0.00 | 12.42 |
+| security actions | 0.00 | 10.00 |
+| evidence leaks outward | 3.42 | 2.67 |
 
-The deterministic fixture is documented in `EXPERIMENTS/FUTURE_EXPLORER_001.md`.
+Sample modeled-world digests:
 
-### Modal zones
+- no security: `49fc8c00`
+- bounded security: `ac5835fa`
 
-- player can plant repeating local zones
-- a Modal captures inhabitants currently inside its radius as anchored participants
-- the zone resets those participants on a deterministic period
-- each reset can leak a configurable memory fragment
-- retained fragments become causal evidence and can contribute to later discrepancy
+The narrow measured result is that the explicit bounded-security condition reduced the denied local replication and repaired the seeded local anomaly. It does **not** demonstrate prevention of investigation/model-break transitions because both fixture conditions produced zero.
 
-### Machine repair programs
+See `EXPERIMENTS/SUBWORLD_SECURITY_STUDY_001.md`.
 
-- two local repair programs exist in machine truth
-- repair policy can be `off`, `tolerant`, or `aggressive`
-- repair nodes move toward eligible anomalies and reduce anomaly intensity / lifespan
-- every actual repair action receives a causal receipt
-- repair programs do not currently erase Modal memory fragments, making those two anomaly routes intentionally distinct
-
-### Causal branch tools
-
-- append-only receipts for interventions and major state transitions on the current branch
-- parent links for causal ancestry inspection
-- manual checkpoints
-- rewind to the latest retained checkpoint
-- rewind archives the abandoned future with its fingerprint and full state before restoring the checkpoint
-- Future Explorer can compare/fork those retained branches without consuming them
-- complete JSON state export/import including topology, hot/cold receipts, Modals, repair nodes, institutions, checkpoints, counters, branch archive, RNG state, replication, containment, and Future Explorer-compatible branch state
-- exact cold-history compaction can move old receipt objects out of the hot graph without changing the canonical fingerprint or breaking ancestry lookup
-
-### Worldglass
-
-The interface deliberately shows two different layers:
-
-**Inhabitant layer**
-- what simulated inhabitants observe
-- their current hypothesis, discrepancy, confidence, memory count, and social context
-
-**Machine truth layer**
-- active anomalies
-- repair programs and policy
-- Modal zones
-- relationship edge count
-- causal receipts, including exact cold-history chunks
-- institution narratives/proposals and voluntary commitments
-- replication load and containment state
-- archived abandoned futures
-- deterministic state fingerprint
-- Future Explorer branch comparison and safe forking
-
-The inhabitants do not automatically receive information merely because Worldglass shows it to the human player.
-
-## Measured experiments already included
-
-`EXPERIMENTS/REPAIR_POLICY_STUDY_001.md` records a 24-seed comparison using the same intervention script under three repair policies.
-
-Inside the retained v0.7.0 repair-policy ruleset, average model breaks across those runs were:
-
-- repair off: **13.38**
-- tolerant repair: **5.58**
-- aggressive repair: **0.04**
-
-That is a property of this simulation, not a general real-world claim. The experiment is retained so later engine changes can be compared against it rather than relying on memory or vibes.
-
-The repository also retains:
-
-- `EXPERIMENTS/INSTITUTION_NARRATIVE_STUDY_001.md`
-- `EXPERIMENTS/INSTITUTION_ACTION_STUDY_001.md`
-- `EXPERIMENTS/LIVED_WORLD_TRADEOFF_001.md`
-- `EXPERIMENTS/COLD_HISTORY_STUDY_001.md`
-- `EXPERIMENTS/REPLICATION_STUDY_001.md`
-- `EXPERIMENTS/CONTAINMENT_STUDY_001.md`
-- `EXPERIMENTS/FUTURE_EXPLORER_001.md`
-
-## Checks
+## Verification
 
 With Node.js installed:
 
@@ -183,56 +97,37 @@ With Node.js installed:
 npm test
 ```
 
-The current suite checks:
+GitHub Actions currently runs syntax checks through v0.12, all **ten deterministic regression suites**, plus the retained containment, Future Explorer, nested-Modal, and living-subworld/security study fixtures.
 
-- deterministic replay under same seed/actions
-- divergence under different seeds
-- causal parent links
-- intervention receipts
-- world bounds
-- daily-life roles, shared places, routine destinations, activity states, and bounded needs
-- workplace production, credits, owned/consumed resources, repeated social meetings, and multi-day project completion
-- connected persistent relationship topology
-- Modal resets and deterministic memory leaks
-- repair-node behavior
-- checkpoint/rewind
-- full serialization round-trip
-- exact deterministic continuation after restoring RNG state
-- inhabitant-authored investigation tests
-- abandoned-future archive preservation across rewind and export/import
-- institutional bounded-knowledge rules, report provenance, narrative change, voluntary proposals/commitments, sessions, opt-out configuration, and deterministic round-trip
-- exact cold-history compaction, hot→cold causal ancestry, fingerprint preservation, and deterministic continuation after import
-- locally valid replication, bounded shared-budget refusal, open-load strain, parent-linked copy receipts, and deterministic replication save/restore
-- lineage-preserving quarantine, retained occupied cells, parent-linked quarantine receipts, explicit no-deletion cycles, and deterministic continuation
-- Future Explorer intervention divergence, same-intervention state-drift alarms, no-loss future forking, world-digest restoration, and deterministic fork round-trip
+The v0.12 suite checks capability denial, jurisdiction denial, target-not-observed denial, range denial, no-loss quarantine, repair/warden separation, local replication, reset-baseline restoration without history deletion, and exact serialize/restore deterministic continuation.
 
-GitHub Actions currently runs the full eight-suite regression set plus the containment and Future Explorer study fixtures.
+## Worldglass
+
+The browser exposes machine truth separately from inhabitant perception and now includes:
+
+- replication + containment controls
+- Modal Tree
+- Future Explorer
+- living nested-subworld controls
+- local anomaly/replicator seeding
+- warden/repairer deployment
+- local resident/program/security readouts
+- causal receipts
+
+Browser-script syntax and engine behavior are verified. A trustworthy real-browser visual smoke test is still not claimed complete because the prior container Chromium environment failed around desktop/DBus.
 
 ## Truth boundary
 
-This project does **not** claim that simulated inhabitants are conscious, sentient, alive, self-aware, or experiencing anything.
+This project does **not** claim that simulated inhabitants are conscious, sentient, alive, self-aware, or literally awakening. A nested simulation mechanic is not evidence that physical reality is simulated. A conditional Future Explorer branch is not a prediction of the actual future.
 
-Words such as *curiosity*, *belief*, *memory*, *choice*, and *awakening* are shorthand for implemented variables and transition rules. The UI prefers **model break** for the strongest current transition because that describes what the code actually does.
+Likewise, v0.12 does not establish a universal security rule. Security roles, ranges, anomaly effects, replication timing, reset rules, and resident thresholds are explicit simulation choices.
 
-The project is fiction-inspired, but fiction is not evidence. Claims about real machines, humans, cognition, emergence, society, physical reality, or the actual future require independent evidence.
+## Direction
 
-Future Explorer does not turn the Garden into a crystal ball. A simulated future is conditional on its starting state, rules, uncertainty treatment, interventions, and model validity.
+The next Matrix-specific work is to deepen cross-layer movement/handoffs, multiple security jurisdictions/policies/budgets, richer nested tasks/resources, stronger inhabitant experimentation and institutions, and larger-scale causal visualization.
 
-## Direction, not destination
-
-The next major direction is a **Baseline Lab / Future Envelope**:
-
-- admit an external starting state with provenance on each field
-- distinguish `observed`, `estimated`, `contested`, and `unknown`
-- branch multiple plausible baseline variants instead of manufacturing one perfect starting state
-- explore conditional futures from those baselines
-- add backtesting against known historical outcomes
-- add sensitivity analysis so the system can show which assumptions actually control a conclusion
-
-The guiding question remains:
-
-> Can we make a world where small understandable rules and interventions create outcomes we did not explicitly script, while still being able to inspect what actually happened and what assumptions made that future possible?
+Foundation Planet / Grammar Glass / Holodeck integration remains a separate weekend architecture experiment rather than being mixed into this Matrix lane.
 
 ## Agent workflow
 
-Read [`AGENTS.md`](AGENTS.md) before contributing. The repository uses **one chat = one PR lane** so parallel AI work does not silently spread across branches or overwrite another lane.
+Read [`AGENTS.md`](AGENTS.md) before contributing. The repository uses **one chat = one PR lane** so parallel AI work does not silently overwrite another lane.

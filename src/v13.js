@@ -294,7 +294,22 @@
 
     stateFingerprint() {
       const parent = super.stateFingerprint();
-      return hashSeed(JSON.stringify({ parent, gates: this.subworldGates })).toString(16).padStart(8, '0');
+      const gates = (this.subworldGates || []).slice().sort((a, b) => String(a.id).localeCompare(String(b.id))).map((gate) => [
+        gate.id,
+        Boolean(gate.active),
+        Boolean(gate.bidirectional),
+        [gate.from && gate.from.modalId, Number(gate.from && gate.from.x), Number(gate.from && gate.from.y)],
+        [gate.to && gate.to.modalId, Number(gate.to && gate.to.x), Number(gate.to && gate.to.y)],
+        Number(gate.capacityPerTick),
+        Number(gate.accessRadius),
+        Number(gate.usedTick),
+        Number(gate.usedThisTick),
+        Number(gate.transits),
+        Number(gate.evidenceHandoffs),
+        Number(gate.createdAt),
+        gate.creationReceiptId || null
+      ]);
+      return hashSeed(JSON.stringify({ parent, gates })).toString(16).padStart(8, '0');
     }
 
     snapshot() {

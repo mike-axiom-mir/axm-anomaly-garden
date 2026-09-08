@@ -6,80 +6,76 @@ Anomaly Garden is an offline deterministic causal simulation lab. It separates m
 
 The browser build has no runtime account, cloud, AI service, package manager, or internet requirement: open `index.html`.
 
-## Current executable stack
+## Completion state — v0.16
+
+v0.16 is the completion boundary for this repository. It is not a claim that every imaginable simulation feature exists; it means the intended Matrix/living-civilization lane now has an executable end-to-end form, deterministic regression coverage, a bounded stress study, and a browser-facing Worldglass control surface. New feature work is not part of the completion plan. Future changes should be maintenance, repair, or deliberately opened new work.
+
+The executable stack now includes:
 
 - deterministic seeded world + exact RNG save/restore
-- 16 outer inhabitants with homes, roles, work, needs, credits, inventory, projects, relationships, institutions, memories, investigations and model-break transitions
-- local anomalies and inhabitant-authored tests
-- root Modals with repeating resets and receipted memory leakage
-- repair programs with off/tolerant/aggressive policies
-- checkpoints, rewind, abandoned-future preservation, exact JSON export/import
-- exact hot/cold causal history and ancestry lookup
-- v0.8 locally-valid machine replication vs shared global viability
-- v0.9 lineage-preserving quarantine
-- v0.10 Future Explorer with world-digest comparison, intervention divergence, drift alarms, and no-loss archived-future forking
-- v0.11 nested Modals with independent local clocks and parent-reset cascades
-- v0.12 living nested subworlds with bounded local residents, local anomalies/programs, local replication, and jurisdiction-limited security programs
+- outer inhabitants with homes, roles, work, needs, credits, inventory, projects, relationships, institutions, memories, investigations and model-break transitions
+- anomalies and inhabitant-authored tests
+- root Modals plus nested Modals with independent clocks, reset cascades and receipted memory leakage
+- repair programs and explicit repair policies
+- checkpoints, rewind, abandoned-future preservation and exact JSON export/import
+- hot/cold causal history and ancestry lookup
+- locally-valid machine replication versus shared viability
+- lineage-preserving quarantine with no deletion
+- Future Explorer with world-digest comparison, intervention divergence and archived-future forking
+- living nested subworlds with local residents, anomalies, programs and bounded security
+- explicit parent/child cross-layer gates for resident transit and source-linked evidence handoff
+- local food/energy/material economies, tasks, treasury and voluntary resident credit transfer
+- local security policy with role admission, finite budgets and explicit action costs
+- repeated resident experiments that can genuinely produce investigations and local model-break states
+- source-linked local assemblies that preserve disagreement without access to raw machine truth
+- resource-aware local replication, explicit resource pressure and deterministic resource recovery
+- pure Worldglass integrity observation plus an explicit causally-receipted completion audit
+- a multi-layer completion scenario and bounded multi-seed completion stress study
 
-## v0.12 — living nested subworlds
+## v0.13 — explicit cross-layer movement
 
-A living subworld is initialized explicitly on an already-existing nested Modal. It owns a bounded local grid, deterministic local residents, local anomalies, local machine programs, and a seeded local baseline that is restored when the enclosing Modal resets.
+Living subworlds no longer need state to appear to teleport between layers. A gate can connect only directly related living parent/child Modals. Gates have an explicit direction, access radius and per-tick capacity.
 
-Important local transitions still write to the outer causal ledger, so a reset does not erase history.
+`transitResident(...)` moves the resident itself, preserving identity, memory and transit history. `handoffResidentEvidence(...)` can pass only evidence already present in that resident's memory. The target receives a source-linked packet, not Worldglass/machine truth.
 
-Local resident state currently includes position, curiosity/skepticism, confidence/discrepancy, local memory, an investigation threshold, investigating state, and local model-break state.
+Gate fingerprints use an explicit canonical tuple, so logically identical save/restore state is not affected by JavaScript object key insertion order.
 
-Local anomaly evidence does **not** automatically become outer-world knowledge. Evidence can cross outward only through the explicit deterministic subworld-memory leak path into the existing `inhabitant.modal-memory-leak` mechanism.
+## v0.14 — local economy and budgeted governance
 
-## Bounded Agent / security-program ecology
+Every living subworld can maintain explicit food, energy and material stock plus a treasury. Residents have deterministic occupations and can perform bounded tasks. Missing inputs block the task rather than creating resources silently. Resident credit transfer is explicit and voluntary.
 
-Security is modeled as multiple local programs, not one omniscient controller.
+Security remains an ecology rather than one omniscient controller. Local policy can admit or deny roles, and security programs receive finite local budgets. Quarantine and repair consume explicit budget; exhausted programs are blocked with a causal receipt instead of acting for free.
 
-Roles:
+## v0.15 — experiments, dissent and resource pressure
+
+A resident can experiment on an anomaly only after actually observing it. Repeated deterministic experiments produce source-linked evidence and can now drive real local investigation and model-break transitions.
+
+The Local Inquiry Assembly constructs reports from resident memory and inbound source-linked evidence. Reports explicitly exclude raw machine truth and can preserve competing stances rather than collapsing disagreement into one narrative. Follow-up proposals remain voluntary.
+
+Local replicators consume material and energy. If the required stock is absent, the copy is blocked with a `resource-pressure` receipt. Recovery is explicit rather than an invisible refill.
+
+## v0.16 — completion / integrity surface
+
+`plantCompletionScenario()` creates an end-to-end nested scenario with two living subworlds, a real cross-layer gate, anomalies, allowed and denied replicators, local economies and budgeted security.
+
+`worldIntegrityReport()` is a **pure observer**. Reading Worldglass or taking snapshots does not increment audit counters or change canonical state. It checks the important cross-layer invariants: unique identities, no active+quarantined program contradiction, finite non-negative budgets/resources, source-linked evidence boundaries, direct living gate endpoints and gate capacity.
+
+`runCompletionAudit()` is the explicit mutating action. It increments audit metrics and writes a causal `world.completion-audit` receipt.
+
+The browser includes a final Living Matrix panel for planting the completion scenario, running a resident task, convening an assembly, attempting gate transit, running the explicit integrity audit and reading the selected subworld's economy/security/institution state.
+
+## Bounded security truth boundary
+
+Security roles remain capability bundles:
 
 - `observer`: observe only
 - `warden`: observe + quarantine programs
 - `repairer`: observe + repair anomalies
 - `custodian`: both action capabilities
 
-Every action must pass four gates:
+Before an action succeeds, the target must pass jurisdiction, capability, knowledge and range checks; v0.14 additionally requires enough explicit local budget. Quarantine retains the target program and lineage and records `deletionCount: 0`.
 
-1. **jurisdiction** — target belongs to the same Modal subworld
-2. **capability** — that security role owns the requested action
-3. **knowledge** — that security program has actually observed the target
-4. **range** — target is within action radius
-
-A failed gate creates a `security.action-blocked` receipt. Quarantine preserves the target program and its lineage; receipts explicitly record `deletionCount: 0`.
-
-This is intentionally different from giving an Agent magical access to all simulator state.
-
-## GitHub-measured v0.12 fixture
-
-`node tools/subworld-security-study.js 12 35`
-
-Each seed contains 4 local residents, one strong `local-distortion`, and one denied local replicator. Only the security condition changes.
-
-| Average at tick 35 | No security | Bounded security |
-| --- | ---: | ---: |
-| active programs | 3.00 | 2.00 |
-| quarantined programs | 0.00 | 1.00 |
-| active anomalies | 1.00 | 0.00 |
-| local program copies | 32.00 | 1.00 |
-| local resident observations | 12.00 | 9.33 |
-| local investigations | 0.00 | 0.00 |
-| local model breaks | 0.00 | 0.00 |
-| security observations | 0.00 | 12.42 |
-| security actions | 0.00 | 10.00 |
-| evidence leaks outward | 3.42 | 2.67 |
-
-Sample modeled-world digests:
-
-- no security: `49fc8c00`
-- bounded security: `ac5835fa`
-
-The narrow measured result is that the explicit bounded-security condition reduced the denied local replication and repaired the seeded local anomaly. It does **not** demonstrate prevention of investigation/model-break transitions because both fixture conditions produced zero.
-
-See `EXPERIMENTS/SUBWORLD_SECURITY_STUDY_001.md`.
+No security program receives magical access to all simulator state.
 
 ## Verification
 
@@ -87,30 +83,48 @@ With Node.js installed:
 
 ```bash
 npm test
+npm run study:completion
 ```
 
-GitHub Actions currently runs syntax checks through v0.12, all **ten deterministic regression suites**, plus the retained containment, Future Explorer, nested-Modal, and living-subworld/security study fixtures.
+`npm test` runs fifteen regression entrypoints spanning the original world, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity and offline browser wiring.
 
-The v0.12 suite checks capability denial, jurisdiction denial, target-not-observed denial, range denial, no-loss quarantine, repair/warden separation, local replication, reset-baseline restoration without history deletion, and exact serialize/restore deterministic continuation.
+`npm run study:completion` runs the v0.16 scenario across multiple deterministic seeds and fails if any integrity audit fails, save/restore fingerprints diverge, resident experiments/investigations/model breaks never occur, assemblies never occur, or the explicit resident transit fails to occur once per seed.
+
+GitHub Actions also runs the retained containment, Future Explorer, nested-Modal and subworld-security studies.
+
+The browser contract test verifies that `index.html` loads the latest v0.16 engine before the controller and that every runtime script/stylesheet reference is local and present. This is executable wiring verification, not a claim of a human pixel-by-pixel visual review on every browser/OS.
 
 ## Worldglass
 
-The browser exposes machine truth separately from inhabitant perception and now includes replication + containment controls, Modal Tree, Future Explorer, living nested-subworld controls, local anomaly/replicator seeding, warden/repairer deployment, local resident/program/security readouts, and causal receipts.
+Worldglass intentionally keeps two different things separate:
 
-Browser-script syntax and engine behavior are verified. A trustworthy real-browser visual smoke test is still not claimed complete because the prior container Chromium environment failed around desktop/DBus.
+- **machine layer:** simulator state, anomalies, programs, gates, receipts and integrity evidence
+- **inhabitant layer:** only what simulated perception, memory, experiments and source-linked social/institutional evidence make available
 
-## Truth boundary
+The completion surface exposes enough of the nested system to operate and inspect the intended lane without silently granting inhabitants machine truth.
 
-This project does **not** claim that simulated inhabitants are conscious, sentient, alive, self-aware, or literally awakening. A nested simulation mechanic is not evidence that physical reality is simulated. A conditional Future Explorer branch is not a prediction of the actual future.
+## Non-claims
 
-Likewise, v0.12 does not establish a universal security rule. Security roles, ranges, anomaly effects, replication timing, reset rules, and resident thresholds are explicit simulation choices.
+This project does **not** claim that simulated inhabitants are conscious, sentient, alive, self-aware or literally awakening. A nested simulation mechanic is not evidence that physical reality is simulated. Future Explorer branches are conditional simulated histories, not predictions of the actual future.
 
-## Direction
+Likewise, the security/economy/institution results are properties of these explicit model rules, not universal laws about real societies or security systems.
 
-The next Matrix-specific work is to deepen cross-layer movement/handoffs, multiple security jurisdictions/policies/budgets, richer nested tasks/resources, stronger inhabitant experimentation and institutions, and larger-scale causal visualization.
+## Architecture boundary
 
-Foundation Planet / Grammar Glass / Holodeck integration remains a separate weekend architecture experiment rather than being mixed into this Matrix lane.
+Anomaly Garden is the Matrix/living-civilization layer. Foundation Planet, Grammar Glass and Holodeck remain separate architecture layers rather than being folded into this repository merely to make one monolith.
 
-## Agent workflow
+## Maintenance boundary
 
-Read [`AGENTS.md`](AGENTS.md) before contributing. The repository uses **one chat = one PR lane** so parallel AI work does not silently overwrite another lane.
+The feature lane ends at v0.16. Preserve these invariants when repairing the repository:
+
+- determinism for claimed deterministic paths
+- exact save/restore continuation
+- causal/source provenance
+- machine-truth versus perception separation
+- explicit cross-layer gates instead of teleporting state
+- bounded jurisdiction/capability/knowledge/range/budget for security actions
+- no-loss quarantine/history
+- source-linked institutions with no raw Worldglass access
+- pure observation: read-only Worldglass methods must not mutate canonical state
+
+Read [`AGENTS.md`](AGENTS.md) before contributing. The historical v0.12 lane record remains in [`LANE_001.md`](LANE_001.md); the final v0.13–v0.16 completion record is [`FINAL_HANDOFF.md`](FINAL_HANDOFF.md).

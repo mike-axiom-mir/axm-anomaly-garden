@@ -1,0 +1,44 @@
+.completion-panel {
+  margin-top: 18px;
+}
+
+.completion-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.completion-controls select {
+  min-width: 190px;
+  flex: 1 1 220px;
+}
+
+.completion-controls button {
+  flex: 0 1 auto;
+}
+
+.completion-readout {
+  margin: 0;
+  padding: 14px;
+  border-radius: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+  font: inherit;
+  min-height: 170px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 720px) {
+  .completion-controls > * {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .completion-readout {
+    min-height: 210px;
+  }
+}

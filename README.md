@@ -129,7 +129,15 @@ The feature lane ends at v0.16. Preserve these invariants when repairing the rep
 
 Read [`AGENTS.md`](AGENTS.md) before contributing. The historical v0.12 lane record remains in [`LANE_001.md`](LANE_001.md); the final v0.13–v0.16 completion record is [`FINAL_HANDOFF.md`](FINAL_HANDOFF.md).
 
-## Animated Worldglass — September 2026
+## Matrix world realization — September 2026
+
+The app now opens on a stylized isometric city. Watch inhabitants walk between their existing locations, switch between city and code views, follow a resident, or pan and zoom the camera. **Seed living worlds** creates the existing completion scenario; choose a nested world from the World menu or select an enterable portal to inspect it. **Inject glitch** creates a real anomaly through the existing simulation controls.
+
+The expandable **laboratory** retains the exact map, simulation settings, checkpoint/rewind, import/export, evidence and gate actions. City architecture, rain and lighting are presentation; they do not add simulation facts. Viewing another layer does not move a resident. This is a 2.5D realization, not a full 3D game.
+
+See [CITY_REALIZATION.md](CITY_REALIZATION.md) for the gap analysis, implemented details and desktop/mobile browser checks.
+
+## Earlier animation pass — September 2026
 
 The animation lane adds persistent, state-driven world markers and separate nested-world maps. Consecutive ticks interpolate between recorded positions; skipped ticks, rewinds and imported worlds snap to their recorded state. Anomaly and Modal animation plays while the world is running. Use **Motion → Reduced**, or the operating system's reduced-motion preference, to disable motion. Selecting a nested resident shows its recorded hypothesis and memory count.
 

@@ -5,6 +5,7 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const errors=[]; const vc=new VirtualConsole(); vc.on('jsdomError',e=>errors.push(e.message));
 const dom=new JSDOM(html,{runScripts:'outside-only',url:'http://localhost/',pretendToBeVisual:true,virtualConsole:vc});
 const w=dom.window; const timers=[]; w.setInterval=fn=>{timers.push(fn);return timers.length};w.clearInterval=()=>{};
+w.ResizeObserver=class{observe(){} disconnect(){}};w.matchMedia=()=>({matches:false});w.HTMLCanvasElement.prototype.getContext=()=>null;
 for(const m of html.matchAll(/<script src="([^"]+)"/g)) w.eval(fs.readFileSync(path.join(root,m[1]),'utf8'));
 const click=id=>w.document.getElementById(id).click();
 assert.equal(w.document.querySelectorAll('#world .person').length, w.AnomalyGardenActiveSimulation.agents.length);

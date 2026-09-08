@@ -137,4 +137,6 @@ Living Matrix actions now refresh the main map and fingerprint immediately. Rend
 
 `npm test` includes the dependency-free renderer regression. An optional DOM integration check can be run with `node tests/dom-integration.cjs` when `jsdom` is installed for development; `AXM_JSDOM_PATH` may point to an external installation. The app itself still opens offline without installing packages.
 
-These changes have DOM/logic verification; rendered motion and mobile visual quality remain unverified because the available cloud browser rejected the local preview URL.
+Browser follow-up: the managed preview successfully rendered the outer and nested worlds. Run advanced the world with visible inhabitant movement; Pause held tick 74; checkpoint/rewind returned to tick 74; Reduced Motion was selectable; the live integrity audit passed with zero errors and warnings. Mobile layout and frame-rate smoothness were not measured.
+
+For development preview, install development dependencies with `npm ci` and run `npm run dev`. Vite is development-only; the offline runtime remains plain local HTML/CSS/JavaScript.

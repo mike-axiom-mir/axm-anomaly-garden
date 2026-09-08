@@ -15,6 +15,10 @@
     "study:futures": "node tools/future-explorer-study.js",
     "study:nested-modals": "node tools/nested-modal-study.js",
     "study:subworld-security": "node tools/subworld-security-study.js 12 35",
-    "study:completion": "node tools/completion-study.js 12 60"
+    "study:completion": "node tools/completion-study.js 12 60",
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "^8.2.2"
   }
 }

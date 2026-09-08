@@ -20,3 +20,20 @@
 - Limitation: cloud browser returned `ERR_BLOCKED_BY_CLIENT` for the local preview; no claim of rendered visual, animation-timing, or mobile-device verification.
 - Next useful check: open `index.html`, plant Full Scenario, Run, inspect nested views and Reduced Motion on a real browser.
 - Git shell lacked credentials; publication uses the connected GitHub app on the same named branch.
+
+## Browser follow-up — 2026-09-08
+
+The initial localhost rejection was a preview routing/setup failure, not evidence that browser QA was unavailable. Added a locked Vite development dependency, dev script and allowed preview host. No runtime dependency or hosting registration was added.
+
+BROWSER_PRIMARY, Chrome desktop viewport approximately 1348 × 926:
+- PASS: full scenario creates two rendered nested maps with residents and program markers.
+- PASS: Run advances tick and visible inhabitant positions (captured ticks 44, 65 and 68).
+- PASS: Pause holds tick 74 across subsequent checks.
+- PASS: checkpoint, +10 and rewind return to tick 74 with archived-future status.
+- PASS: Reduced Motion selection is retained in the control.
+- PASS: live explicit integrity audit reports zero errors and zero warnings.
+- UNKNOWN: frame-rate smoothness and mobile layout; screenshot cadence does not prove either.
+- Browser log errors observed belonged to the browser extension metadata bridge, not application scripts.
+- Screenshots were inspected in memory; no raw capture files retained.
+
+This follow-up supersedes the earlier blanket rendered-browser limitation; the original failed-attempt receipt is preserved above.

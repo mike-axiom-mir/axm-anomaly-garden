@@ -20,6 +20,7 @@ const browserEngineScripts = [
   'src/v14.js',
   'src/v15.js',
   'src/v16.js',
+  'src/state-contract.js',
   'src/browser-state-admission.js'
 ];
 
@@ -29,6 +30,8 @@ function loadBrowserRuntime() {
     const source = fs.readFileSync(path.join(root, relativePath), 'utf8');
     vm.runInContext(source, context, { filename: relativePath });
   }
+  assert(context.AnomalyGardenStateContract, 'portable state contract must be exposed in browser mode');
+  assert(context.AnomalyGardenBrowserStateAdmission, 'browser admission adapter must be exposed');
   return context;
 }
 

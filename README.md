@@ -77,6 +77,26 @@ Before an action succeeds, the target must pass jurisdiction, capability, knowle
 
 No security program receives magical access to all simulator state.
 
+## Consume the deterministic engine outside this checkout
+
+The completed v0.16 engine now has a bounded CommonJS package and JSON command
+surface. `npm pack` creates a local, dependency-free tarball; the package stays
+private so it cannot be published to a registry accidentally. External
+consumers can import `GardenSimulation`, run the declared completion scenario,
+and verify a receipt through full deterministic re-execution without copying
+the version-layer source chain.
+
+```bash
+npm pack --pack-destination ./dist
+npm install --ignore-scripts --no-audit --no-fund \
+  ./dist/axm-anomaly-garden-0.16.0.tgz
+npx --no-install anomaly-garden run --seed consumer-proof --ticks 28 > receipt.json
+npx --no-install anomaly-garden verify receipt.json
+```
+
+See [`PACKAGE_CONSUMER.md`](PACKAGE_CONSUMER.md) for offline installation,
+library entrypoints, request limits, and the exact truth boundary.
+
 ## Verification
 
 With Node.js installed:
@@ -86,7 +106,7 @@ npm test
 npm run study:completion
 ```
 
-`npm test` runs fifteen regression entrypoints spanning the original world, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity and offline browser wiring.
+`npm test` runs sixteen regression entrypoints spanning the original world, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity, offline browser wiring and clean external package consumption.
 
 `npm run study:completion` runs the v0.16 scenario across multiple deterministic seeds and fails if any integrity audit fails, save/restore fingerprints diverge, resident experiments/investigations/model breaks never occur, assemblies never occur, or the explicit resident transit fails to occur once per seed.
 

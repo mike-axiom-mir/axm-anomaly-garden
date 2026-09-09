@@ -40,9 +40,9 @@ function clone(value) {
 }
 
 function problemSignatures(result) {
-  return (result.problems || [])
-    .map((problem) => [problem.code, problem.path, problem.message])
-    .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  const signatures = Array.from(result.problems || [], (problem) => [problem.code, problem.path, problem.message]);
+  signatures.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  return JSON.stringify(signatures);
 }
 
 const source = new NodeGardenSimulation({ seed: 'shared-state-contract-parity' });
@@ -92,7 +92,7 @@ for (const fixture of fixtures) {
   const context = loadBrowserRuntime();
   const browserResult = context.AnomalyGardenBrowserStateAdmission.validateSerializedState(forged);
   assert.strictEqual(browserResult.ok, false, fixture.name + ': browser contract must reject the same fixture');
-  assert.deepStrictEqual(
+  assert.strictEqual(
     problemSignatures(browserResult),
     problemSignatures(nodeResult),
     fixture.name + ': browser and Node semantic problem sets must be identical'

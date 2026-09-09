@@ -8,6 +8,7 @@ const outer=project(sim,'outer');
 assert.equal(outer.people.length,sim.agents.length);
 assert.equal(outer.buildings.filter(b=>b.type!=='home').length,sim.places.length);
 assert.equal(outer.portals.filter(p=>p.enterable).length,2);
+const stack=outer.portals.filter(p=>p.x===5&&p.y===4);assert.equal(stack.length,3);assert.deepEqual(stack.map(p=>p.stackIndex),[0,1,2]);assert(stack.every(p=>p.stackTotal===3));
 assert.equal(outer.relationships.length,sim.relationships.length);
 assert.equal(outer.institutions.length,sim.institutions.length);
 assert.equal(outer.dayLength,sim.config.dayLength);

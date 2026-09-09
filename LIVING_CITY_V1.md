@@ -46,7 +46,9 @@ Effects use no simulation random number source. Buildings, rain, skyline, lighti
 - optional DOM integration operates the full Canvas experience, camera controls, nested worlds, intervention and reduced motion without view-state mutation
 - the 12-seed, 60-tick completion study passes with zero integrity failures and zero save/restore mismatches
 
-Rendered desktop and phone review is still required. The managed preview starts, but the cloud browser rejects its preview URL under its current URL policy. No alternate browser route was used after that rejection.
+Rendered verification now passes through the supported managed preview. A stale browser tab had fallen onto an internal error page; opening a fresh tab at the documented preview address restored access without changing hosts or browser surfaces. Desktop inspection covered the outer city, active ticks, city/code expressions, planted Modal stack, event camera, resident follow, glitch injection, reduced motion and a living nested world. The compact depth labels and horizontal portal fan were added after this review exposed a central label pile-up.
+
+A 390 × 844 iframe of the same application measured 375px body and scroll widths, with no page overflow. Run advanced the outer and nested clocks, Modal-003 selection worked, and real program, repair, stabilization and memory cues remained readable. The phone legend now wraps without its earlier internal scrollbar. No application-script errors were present in the browser log. Canvas drawing averaged 1.32ms over 120 samples in the preview, while cloud frame callbacks remained irregular; this supports a bounded draw cost but does not establish sustained FPS.
 
 ## Remaining limits
 

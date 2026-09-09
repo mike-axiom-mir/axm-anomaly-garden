@@ -54,6 +54,13 @@
       const from = g.from.modalId === zone.id, end = from ? g.from : g.to;
       return { id:g.id, x:end.x, y:end.y, destination:from ? g.to.modalId : g.from.modalId, enterable:true, gate:true };
     });
+    const allPortals = portals.concat(gates);
+    const portalStacks = new Map();
+    for (const portal of allPortals) {
+      const key = portal.x + ',' + portal.y, stack = portalStacks.get(key) || [];
+      stack.push(portal); portalStacks.set(key, stack);
+    }
+    for (const stack of portalStacks.values()) stack.forEach((portal, index) => { portal.stackIndex = index; portal.stackTotal = stack.length; });
     const positions = new Map(people.map(a => [a.id, a]));
     const relationships = (sw ? [] : sim.relationships || []).map(r => {
       const a = positions.get(r.a), b = positions.get(r.b);
@@ -70,7 +77,7 @@
       key:zone ? zone.id : 'outer', title:zone ? 'SUBWORLD / ' + zone.id : 'THE CONSTRUCT', tick, outerTick:sim.tick,
       width:sw ? sw.width : sim.config.width, height:sw ? sw.height : sim.config.height, seed:sim.seedText,
       depth, iteration:zone ? Number(zone.iteration || 0) : 0, dayLength, dayPhase:(tick % dayLength) / dayLength,
-      people, buildings, portals:portals.concat(gates), anomalies, programs,
+      people, buildings, portals:allPortals, anomalies, programs,
       repairs:(sw ? [] : sim.repairNodes).map(r => ({ id:r.id, x:r.x, y:r.y, actions:Number(r.actions || 0), lastActionTick:Number(r.lastActionTick || -999) })),
       relationships, institutions,
       layers:sim.modalZones.filter(z => z.active && z.subworld).map(z => ({ id:z.id, depth:z.depth || 0 })),

@@ -375,7 +375,9 @@
 
     portal(portal) {
       const c = this.ctx, anchor = this.point(portal.x, portal.y), k = this.scale, phase = this.clock * .001;
-      const base = { x:anchor.x, y:anchor.y - (portal.depth || 0) * 52 * k };
+      // Co-located nested layers fan horizontally while keeping their canonical anchor visible.
+      const stackOffset = (Number(portal.stackIndex || 0) - (Number(portal.stackTotal || 1) - 1) / 2) * 36 * k;
+      const base = { x:anchor.x + stackOffset, y:anchor.y - (portal.depth || 0) * 52 * k };
       if (portal.depth) this.line(anchor, base, this.colors.accent + '44');
       const radius = (portal.gate ? 16 : 23) * k;
       c.save(); c.translate(base.x, base.y - 12 * k); c.strokeStyle = portal.gate ? '#f4d69b' : this.colors.accent; c.lineWidth = 2 * k; c.shadowBlur = 12; c.shadowColor = c.strokeStyle;
@@ -383,7 +385,9 @@
       c.setLineDash([4, 6]); c.lineDashOffset = -phase * 10; c.beginPath(); c.ellipse(0, 0, radius * .9, radius * 1.2, 0, 0, Math.PI * 2); c.stroke(); c.setLineDash([]);
       for (let i = 0; i < 4; i++) { const y = ((phase * .4 + i / 4) % 1) * radius * 1.4 - radius * .7; c.fillStyle = this.colors.accent + '33'; c.fillRect(-radius * .3, y, radius * .6, 2 * k); }
       c.restore();
-      this.label(portal.gate ? 'GATE → ' + portal.destination : portal.id.toUpperCase(), { x:base.x, y:base.y - radius * 1.6 - 8 * k }, portal.gate ? '#f4d69b' : this.colors.accent, 10);
+      const stacked = Number(portal.stackTotal || 1) > 1;
+      const title = portal.gate ? 'GATE → ' + portal.destination : stacked && this.mode !== 'code' ? 'D' + Number(portal.depth || 0) : portal.id.toUpperCase();
+      this.label(title, { x:base.x, y:base.y - radius * 1.6 - 8 * k }, portal.gate ? '#f4d69b' : this.colors.accent, stacked && this.mode !== 'code' ? 9 : 10);
       if (portal.enterable) this.hits.push({ id:portal.gate ? portal.destination : portal.id, portal:true, x:base.x, y:base.y - 12 * k, radius });
     }
 

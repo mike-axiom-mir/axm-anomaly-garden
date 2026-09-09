@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - automation/truth-sentinel-browser-restore-admission-20260909
+      - automation/state-architect-shared-state-contract-20260909
   pull_request:
     paths:
+      - 'src/state-contract.js'
       - 'src/browser-state-admission.js'
       - 'tests/browser-deserialization-admission.test.js'
+      - 'tests/state-contract-parity.test.js'
       - 'index.html'
       - '.github/workflows/browser-deserialization-admission.yml'
 
@@ -27,7 +30,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Syntax gate
-        run: node --check src/browser-state-admission.js && node --check tests/browser-deserialization-admission.test.js
+        run: node --check src/state-contract.js && node --check src/browser-state-admission.js && node --check tests/browser-deserialization-admission.test.js && node --check tests/state-contract-parity.test.js
+      - name: Shared state-contract parity regression
+        run: node tests/state-contract-parity.test.js
       - name: Browser restore admission regression
         run: node tests/browser-deserialization-admission.test.js
       - name: Canonical state contract regression

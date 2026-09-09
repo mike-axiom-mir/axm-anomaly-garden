@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),vm=require('node:vm');
+const {GardenSimulation}=require('../src/v16.js');
+const projection=require('../src/city-projection');
+const signals=require('../src/city-signals');
+let now=100;
+const gradient={addColorStop(){}};
+const ctx=new Proxy({measureText:text=>({width:String(text).length*6}),createLinearGradient:()=>gradient,createRadialGradient:()=>gradient}, {get:(target,key)=>key in target?target[key]:(()=>{})});
+const context={window:{AnomalyGardenCityProjection:projection,AnomalyGardenCitySignals:signals,devicePixelRatio:1},performance:{now:()=>now},ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame:()=>1,cancelAnimationFrame(){},document:{hidden:false}};
+vm.runInNewContext(fs.readFileSync(require.resolve('../src/city-renderer'),'utf8'),context);
+const renderer=Object.create(context.window.AnomalyGardenCityRenderer.prototype);
+Object.assign(renderer,{ctx,canvas:{},scene:null,previous:new Map(),targets:new Map(),trails:new Map(),signals:[],selected:null,follow:false,eventFocus:false,mode:'city',zoom:1,pan:{x:0,y:0},focusPoint:null,hits:[],clock:100,running:true,reduced:false,frames:[],cadence:[],width:1000,height:650,last:0,changeAt:0,transitionAt:0,dpr:1});
+const sim=new GardenSimulation({seed:'renderer-proof'});sim.plantCompletionScenario();
+const outer=projection.project(sim,'outer');renderer.setScene(outer);renderer.selected=outer.people[0].id;
+for(const mode of ['city','code'])for(const reduced of [false,true]){renderer.mode=mode;renderer.reduced=reduced;assert.doesNotThrow(()=>renderer.draw(now));}
+renderer.follow=true;sim.step();now+=420;renderer.setScene(projection.project(sim,'outer'));assert.doesNotThrow(()=>renderer.draw(now));assert(renderer.trails.get(renderer.selected).length>=1);
+renderer.eventFocus=true;sim.addAnomaly('loop-echo',{x:3,y:3});renderer.setScene(projection.project(sim,'outer'));assert(renderer.signals.some(s=>s.kind==='glitch'));assert.doesNotThrow(()=>renderer.draw(now));
+const canonical=sim.serialize();
+const nested=projection.project(sim,sim.modalZones.find(z=>z.subworld).id);renderer.setScene(nested);assert.equal(renderer.signals.length,0);renderer.width=390;renderer.height=480;assert.doesNotThrow(()=>renderer.draw(now));
+assert.equal(sim.serialize(),canonical,'renderer projection and draw should not alter canonical state');
+console.log('City renderer: PASS (outer/nested, city/code, motion/reduced, follow, event focus, mobile, no draw mutation)');

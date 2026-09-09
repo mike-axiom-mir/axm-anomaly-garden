@@ -47,3 +47,21 @@ Validation: renderer syntax check, all 17 regression entrypoints and optional DO
 Added a pure snapshot-difference module and bounded city pulses for newly observed glitches, investigation/model-break transitions, quarantine, and positive repair/program action deltas. Labels report the observed change and aggregate count, not an inferred cause, target or reconstructed intermediate history. New entities do not imply prior actions. First load, layer/seed change and rewind establish a fresh baseline. Same-tick interventions are detected; repeated observations do not duplicate pulses. At most 24 cues persist for 2.4 seconds, with only four labels. Reduced motion uses static rings rather than expansion/floating.
 
 All 18 test entrypoints pass; focused lifecycle checks cover deduplication, expiration and reset. DOM integration passes. Browser appearance remains unverified following the previous URL policy rejection; no bypass or alternate browser route was attempted. Next useful experiment remains live visual review of dense scenes, label overlap and reduced-motion appearance. Engine and canonical state are unchanged.
+
+## Living Matrix World v1 milestone
+
+The world realization now has a complete state-driven expression pass rather than isolated animation patches. Residents have distinct walk, work, social, investigation and rest behavior; role colour, facing and secondary motion; selected route history, destination and smooth follow; real hunger/energy/social meters; and persistent investigation/model-break identity. Social co-location, building stock, institutional models, program generation/knowledge, repair strength and anomaly intensity are directly visible.
+
+The camera supports overview, resident follow and recent-change follow. A compact navigator preserves orientation while panning and zooming. Layer entry has a bounded transition, and nested worlds derive distinct palettes and architecture from their recorded depth, key and seed. Collision-aware labels, fixed trail/signal/particle budgets, phone controls and reduced-motion equivalents bound the presentation cost.
+
+`city-projection.js` remains a detached, pure view contract. `city-signals.js` compares recorded snapshots and now includes tests, memory, projects, meetings, shared patterns, replication, institutions and anomaly stabilization. It never reconstructs unobserved intermediate actions. The v0.16 engine is unchanged.
+
+Final automated evidence for this milestone:
+
+- all 20 dependency-free test entrypoints pass
+- a real 60-tick Living City integration reaches movement, glitch, repair, stabilization, investigation, model break, tests, memory, replication and institution cues
+- the 12-seed × 60-tick completion study passes with zero integrity failures and zero save/restore mismatches
+- the Canvas renderer test covers outer/nested, city/code, active/reduced motion, resident follow, event focus and a 390px drawing surface without mutating canonical state
+- both the original Canvas-unavailable fallback DOM test and the full mocked-Canvas DOM interaction test pass
+
+Rendered review of this revision remains outstanding. The managed preview service starts, but the cloud browser rejects the preview URL under its current URL policy. No alternate browser surface or bypass was used. Earlier screenshots prove the preceding city revision, not this milestone's final pixels.

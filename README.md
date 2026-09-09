@@ -86,7 +86,7 @@ npm test
 npm run study:completion
 ```
 
-`npm test` runs fifteen regression entrypoints spanning the original world, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity and offline browser wiring.
+`npm test` runs twenty regression entrypoints spanning the original world, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity, offline browser wiring and the Living City realization.
 
 `npm run study:completion` runs the v0.16 scenario across multiple deterministic seeds and fails if any integrity audit fails, save/restore fingerprints diverge, resident experiments/investigations/model breaks never occur, assemblies never occur, or the explicit resident transit fails to occur once per seed.
 
@@ -131,11 +131,13 @@ Read [`AGENTS.md`](AGENTS.md) before contributing. The historical v0.12 lane rec
 
 ## Matrix world realization — September 2026
 
-The app now opens on a stylized isometric city. Watch inhabitants walk between their existing locations, switch between city and code views, follow a resident, or pan and zoom the camera. **Seed living worlds** creates the existing completion scenario; choose a nested world from the World menu or select an enterable portal to inspect it. **Inject glitch** creates a real anomaly through the existing simulation controls.
+The app now opens on a stylized isometric city. Inhabitants visibly walk, work, rest, socialize and investigate according to their recorded state. Follow a resident's real route and destination, watch the camera move to actual world changes, inspect live building stock, or use the navigator, pan and zoom controls. Code view exposes program generations, security knowledge, anomaly strength and institutional narratives.
+
+**Seed living worlds** creates the existing completion scenario. Nested worlds have deterministic depth-specific palettes and architecture; choose one from the World menu or select an enterable portal. **Inject glitch** creates a real anomaly through the existing simulation control. Repair, experiments, memory, model breaks, program copies, quarantine and institutional updates appear when their source state changes.
 
 The expandable **laboratory** retains the exact map, simulation settings, checkpoint/rewind, import/export, evidence and gate actions. City architecture, rain and lighting are presentation; they do not add simulation facts. Viewing another layer does not move a resident. This is a 2.5D realization, not a full 3D game.
 
-See [CITY_REALIZATION.md](CITY_REALIZATION.md) for the gap analysis, implemented details and desktop/mobile browser checks.
+See [LIVING_CITY_V1.md](LIVING_CITY_V1.md) for the current expression contract and acceptance evidence. [CITY_REALIZATION.md](CITY_REALIZATION.md) preserves the original gap analysis and earlier browser evidence.
 
 ## Earlier animation pass — September 2026
 

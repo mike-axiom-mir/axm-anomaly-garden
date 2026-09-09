@@ -4,11 +4,12 @@
   const stage=document.createElement('section');stage.className='city-stage';stage.setAttribute('aria-label','Animated Matrix world');
   stage.innerHTML=`
     <header class="city-heading"><div><p class="eyebrow">WORLDGLASS / LIVE WORLD</p><h2 id="city-title">The Construct</h2></div><div class="city-state"><span id="city-running">PAUSED</span><span id="city-clock">TICK 0</span></div></header>
-    <div class="city-toolbar"><label>World <select id="city-layer" aria-label="World layer"><option value="outer">Outer world</option></select></label><div class="city-view-buttons"><button id="city-code" aria-pressed="false">Code view</button><button id="city-follow" aria-pressed="false">Follow resident</button><button id="city-fit">Fit world</button><button id="city-zoom-out" aria-label="Zoom out">−</button><button id="city-zoom-in" aria-label="Zoom in">+</button></div></div>
-    <div class="city-viewport"><canvas id="city-canvas" tabindex="0" aria-label="Isometric simulation city. Drag to pan. Use the zoom buttons. Select residents with the resident menu below."></canvas><div class="city-overlay"><span id="city-layer-tag">OUTER WORLD</span><strong id="city-population">16 inhabitants</strong><span id="city-signals"></span></div><div class="city-view-notice" id="city-view-notice">Select a resident to follow their day.</div></div>
+    <div class="city-toolbar"><label>World <select id="city-layer" aria-label="World layer"><option value="outer">Outer world</option></select></label><div class="city-view-buttons"><button id="city-code" aria-pressed="false">Code view</button><button id="city-follow" aria-pressed="false">Follow resident</button><button id="city-watch" aria-pressed="false">Watch changes</button><button id="city-fit">Fit world</button><button id="city-zoom-out" aria-label="Zoom out">−</button><button id="city-zoom-in" aria-label="Zoom in">+</button></div></div>
+    <div class="city-viewport"><canvas id="city-canvas" tabindex="0" aria-label="Isometric simulation city. Drag to pan. Use the zoom buttons. Select residents with the resident menu below."></canvas><div class="city-overlay"><span id="city-layer-tag">OUTER WORLD</span><strong id="city-population">16 inhabitants</strong><span id="city-signals"></span><span id="city-phase">REST CYCLE</span></div><div class="city-view-notice" id="city-view-notice">Select a resident to follow their day.</div></div>
     <div class="city-dock"><div id="city-clock-controls" class="city-clock-controls"></div><div class="city-interventions"><button id="city-seed">Seed living worlds</button><label class="sr-only" for="city-disturbance">Disturbance</label><select id="city-disturbance"><option value="loop-echo">Loop echo</option><option value="gravity-slip">Gravity slip</option><option value="time-pocket">Time pocket</option><option value="memory-scar">Memory scar</option></select><button id="city-inject">Inject glitch</button></div><div id="city-motion-slot"></div></div>
     <div class="city-bottom"><section class="city-resident"><label for="city-person">Resident</label><select id="city-person"></select><div id="city-resident-detail"></div></section><section class="city-events"><p class="eyebrow">RECENT CAUSES</p><div id="city-events"></div></section></div>
-    <p class="city-footnote">Position pulses mark observed changes: green glitches/repairs, amber investigation, purple model break, blue quarantine. City architecture and atmosphere express the model; they do not add simulation rules. Portals change your view. Resident transit remains an explicit gate action.</p>`;
+    <div class="city-legend" aria-label="World signal legend"><span><i class="routine"></i>routine</span><span><i class="inquiry"></i>investigation</span><span><i class="break"></i>model break</span><span><i class="repair"></i>repair</span><span><i class="quarantine"></i>quarantine</span></div>
+    <p class="city-footnote">Position pulses mark observed changes from recorded state. City architecture and atmosphere express the model. Portals change your view; resident transit remains an explicit gate action.</p>`;
   shell.prepend(stage);
   if(!stage.querySelector('canvas').getContext('2d')||typeof ResizeObserver==='undefined'){stage.remove();return;}
   // Preserve every original lab control, action and source of truth; change only their placement.
@@ -30,8 +31,10 @@
     const title=document.createElement('strong');title.textContent=a.name+' / '+a.role;
     const state=document.createElement('span');state.className=a.awakened?'state-break':a.investigating?'state-inquiry':'';state.textContent=a.awakened?'MODEL BREAK':a.investigating?'INVESTIGATING':a.activity.toUpperCase();
     const observation=document.createElement('p');observation.textContent=a.observation||a.hypothesis||'No observation recorded.';
-    const meta=document.createElement('small');meta.textContent=a.memories+' memories · discrepancy '+a.discrepancy.toFixed(2)+' · cell '+a.x+', '+a.y;
-    detail.append(title,state,observation,meta);
+    const meta=document.createElement('small');meta.textContent=a.memories+' memories · '+a.tests+' tests · discrepancy '+a.discrepancy.toFixed(2)+' · cell '+a.x+', '+a.y;
+    const meters=document.createElement('div');meters.className='city-meters';
+    for(const item of [['energy',a.energy],['hunger',a.hunger],['social',a.socialNeed]]){const meter=document.createElement('span');meter.textContent=item[0];meter.style.setProperty('--value',Math.round(Math.max(0,Math.min(1,item[1]))*100)+'%');meters.appendChild(meter);}
+    detail.append(title,state,observation,meta,meters);
   }
   function update(){
     const sim=window.AnomalyGardenActiveSimulation;if(!sim)return;
@@ -49,7 +52,9 @@
     $('city-disturbance').disabled=layer!=='outer';$('city-inject').textContent=layer==='outer'?'Inject glitch':'Local glitch';
     $('city-layer-tag').textContent=layer==='outer'?'OUTER WORLD':'NESTED WORLD';$('city-population').textContent=snapshot.people.length+' inhabitants';
     $('city-signals').textContent=snapshot.anomalies.length+' glitches · '+snapshot.portals.length+' portals · '+snapshot.programs.filter(p=>p.quarantined).length+' quarantined';
+    const phase=snapshot.dayPhase<10/snapshot.dayLength?'REST':snapshot.dayPhase<29/snapshot.dayLength?'WORK':snapshot.dayPhase<38/snapshot.dayLength?'SOCIAL':'HOME';$('city-phase').textContent=phase+' CYCLE';
     $('city-follow').setAttribute('aria-pressed',String(renderer.follow));
+    $('city-watch').setAttribute('aria-pressed',String(renderer.eventFocus));
     const eventKey=snapshot.receipts.map(r=>r.id).join('|')+':'+layer;
     if(eventKey!==lastRender){lastRender=eventKey;$('city-events').replaceChildren();for(const r of snapshot.receipts.slice(-3).reverse()){const row=document.createElement('div');const time=document.createElement('span');time.textContent='T'+r.tick;const text=document.createElement('span');text.textContent=r.type;row.append(time,text);$('city-events').appendChild(row);}}
     const avg=renderer.frames.length?renderer.frames.reduce((a,b)=>a+b,0)/renderer.frames.length:0;canvas.dataset.drawMeanMs=avg.toFixed(2);canvas.dataset.drawSamples=String(renderer.frames.length);const sorted=renderer.cadence.slice().sort((a,b)=>a-b);canvas.dataset.frameIntervalP95Ms=sorted.length?sorted[Math.floor((sorted.length-1)*.95)].toFixed(2):'0';canvas.dataset.layer=layer;canvas.dataset.tick=String(snapshot.tick);
@@ -59,6 +64,7 @@
   $('city-person').addEventListener('change',e=>selectResident(e.target.value));
   $('city-code').addEventListener('click',()=>{renderer.mode=renderer.mode==='city'?'code':'city';$('city-code').setAttribute('aria-pressed',String(renderer.mode==='code'));$('city-code').textContent=renderer.mode==='code'?'City view':'Code view';});
   $('city-follow').addEventListener('click',()=>{renderer.follow=!renderer.follow;update();});
+  $('city-watch').addEventListener('click',()=>{renderer.eventFocus=!renderer.eventFocus;if(renderer.eventFocus)renderer.follow=false;renderer.focusPoint=null;update();});
   $('city-fit').addEventListener('click',()=>{renderer.resetCamera();update();});
   $('city-zoom-in').addEventListener('click',()=>renderer.zoom=Math.min(2.5,renderer.zoom*1.2));
   $('city-zoom-out').addEventListener('click',()=>renderer.zoom=Math.max(.65,renderer.zoom/1.2));

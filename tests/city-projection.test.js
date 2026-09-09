@@ -8,9 +8,16 @@ const outer=project(sim,'outer');
 assert.equal(outer.people.length,sim.agents.length);
 assert.equal(outer.buildings.filter(b=>b.type!=='home').length,sim.places.length);
 assert.equal(outer.portals.filter(p=>p.enterable).length,2);
+assert.equal(outer.relationships.length,sim.relationships.length);
+assert.equal(outer.institutions.length,sim.institutions.length);
+assert.equal(outer.dayLength,sim.config.dayLength);
+assert.equal(outer.people[0].plannedActivity,sim.agents[0].plannedActivity);
+assert.equal(outer.people[0].project.completions,sim.agents[0].project.completions);
+assert.equal(outer.buildings.find(b=>b.id==='place-market').stock,sim.places.find(p=>p.id==='place-market').stock);
 for(const zone of sim.modalZones.filter(z=>z.subworld)){
   const view=project(sim,zone.id);
   assert.equal(view.key,zone.id);assert.equal(view.tick,zone.subworld.tick);
+  assert.equal(view.depth,zone.depth);assert.equal(view.institutions.length,zone.subworld.institutions.length);
   assert.deepEqual(view.people.map(a=>[a.id,a.x,a.y]),zone.subworld.residents.map(a=>[a.id,a.x,a.y]));
   assert(view.portals.some(g=>g.gate),'actual cross-layer gate is visible');
 }

@@ -15,13 +15,19 @@ after.repairs[0].actions=1;assert(!changes(before,after).some(s=>s.kind==='repai
 assert(changes(before,{...after,tick:1}).some(s=>s.kind==='glitch'));
 after.programs.push({id:'new',x:2,y:2,actions:100});assert(!changes(before,after).some(s=>s.id==='new'));
 const result=changes(before,after);result[0].x=100;assert.equal(after.people[0].x,0);
+const richBefore={...before,people:[{...before.people[0],tests:1,memories:2,project:{completions:0}}],relationships:[{id:'link',x:1,y:1,meetings:0,signals:0}],institutions:[{id:'council',x:2,y:2,reports:0,narrative:'routine'}]};
+const richAfter=structuredClone(richBefore);richAfter.tick=2;richAfter.people[0].tests=2;richAfter.people[0].memories=3;richAfter.people[0].project.completions=1;richAfter.relationships[0].meetings=1;richAfter.relationships[0].signals=1;richAfter.institutions[0].reports=1;
+assert.deepEqual(changes(richBefore,richAfter).map(s=>s.kind),['test','memory','project','social','share','institution']);
+const repairBefore={...richBefore,anomalies:[{id:'g',x:2,y:2,intensity:.8}]};const repairAfter=structuredClone(repairBefore);repairAfter.tick=2;repairAfter.anomalies[0].intensity=.5;
+assert(changes(repairBefore,repairAfter).some(s=>s.kind==='stabilize'&&s.label==='STABILITY +30'));
+repairAfter.anomalies=[];assert(changes(repairBefore,repairAfter).some(s=>s.label==='GLITCH CLOSED'));
 console.log('City signals: PASS (observed deltas, purity, reset, rewind, same-tick intervention, no invented history)');
 // Exercise the real renderer's signal lifetime without a browser or a simulated engine.
 const vm=require('node:vm'),fs=require('node:fs');let now=100;
 const context={window:{AnomalyGardenCityProjection:{hash:()=>1},AnomalyGardenCitySignals:{changes}},performance:{now:()=>now}};
 vm.runInNewContext(fs.readFileSync(require.resolve('../src/city-renderer'),'utf8'),context);
 const renderer=Object.create(context.window.AnomalyGardenCityRenderer.prototype);
-Object.assign(renderer,{scene:null,signals:[],previous:new Map(),targets:new Map(),width:1000});
+Object.assign(renderer,{scene:null,signals:[],previous:new Map(),targets:new Map(),trails:new Map(),width:1000});
 renderer.setScene(before);assert.equal(renderer.signals.length,0);
 renderer.setScene(after);assert(renderer.signals.length>0);
 const count=renderer.signals.length;renderer.setScene(after);assert.equal(renderer.signals.length,count);

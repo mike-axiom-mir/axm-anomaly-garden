@@ -53,6 +53,11 @@
     document.body.classList.remove('running');
   }
 
+  function pause() {
+    stop();
+    setStatus('World paused at tick ' + sim.tick + '. Canonical state is held; step once, inspect evidence, or continue the clock.');
+  }
+
   function setStatus(message) { status.textContent = message; }
 
   function inject(kind) {
@@ -379,7 +384,7 @@
   document.getElementById('step').addEventListener('click', function () { step(1); });
   document.getElementById('step10').addEventListener('click', function () { step(10); });
   document.getElementById('run').addEventListener('click', start);
-  document.getElementById('pause').addEventListener('click', stop);
+  document.getElementById('pause').addEventListener('click', pause);
   document.getElementById('whisper').addEventListener('click', whisper);
   document.getElementById('modal').addEventListener('click', plantModal);
   document.getElementById('checkpoint').addEventListener('click', createCheckpoint);

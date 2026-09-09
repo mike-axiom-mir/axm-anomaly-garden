@@ -20,6 +20,7 @@ const browserEngineScripts = [
   'src/v14.js',
   'src/v15.js',
   'src/v16.js',
+  'src/state-contract.js',
   'src/browser-state-admission.js'
 ];
 
@@ -30,6 +31,7 @@ function loadBrowserRuntime() {
     vm.runInContext(source, context, { filename: relativePath });
   }
   assert(context.AnomalyGardenSim, 'browser engine must expose AnomalyGardenSim');
+  assert(context.AnomalyGardenStateContract, 'browser engine must expose the shared state contract');
   assert(context.AnomalyGardenBrowserStateAdmission, 'browser state admission guard must be installed');
   return context;
 }
@@ -43,12 +45,14 @@ function rejectionFor(BrowserGardenSimulation, input) {
   return null;
 }
 
-(function browserWiringPlacesAdmissionBeforeImportController() {
+(function browserWiringPlacesSharedContractBeforeImportController() {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const v16 = html.indexOf('src="src/v16.js"');
+  const contract = html.indexOf('src="src/state-contract.js"');
   const admission = html.indexOf('src="src/browser-state-admission.js"');
   const app = html.indexOf('src="src/app.js"');
-  assert(v16 >= 0 && admission > v16, 'browser admission guard must load after v16');
+  assert(v16 >= 0 && contract > v16, 'shared state contract must load after v16');
+  assert(admission > contract, 'browser admission adapter must load after the shared state contract');
   assert(app > admission, 'browser admission guard must load before the import controller');
 })();
 

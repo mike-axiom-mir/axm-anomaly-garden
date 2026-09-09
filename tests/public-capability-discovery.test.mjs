@@ -34,6 +34,14 @@ function makeFixture() {
   ]) {
     fs.copyFileSync(path.join(ROOT, relative), path.join(root, relative));
   }
+  // The portable runner requires v16 at module load even when only describe() is used.
+  // Keep fixture behavior focused by satisfying that import with a non-executed stub;
+  // the real repository test above still runs the actual package CLI and engine chain.
+  fs.writeFileSync(
+    path.join(root, 'src/v16.js'),
+    "'use strict';\nmodule.exports = { GardenSimulation: class GardenSimulation {} };\n",
+    'utf8',
+  );
   return root;
 }
 

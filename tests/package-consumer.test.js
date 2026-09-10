@@ -30,6 +30,14 @@ function execute(command, arguments_, options) {
   return completed;
 }
 
+function executeHeld(command, arguments_, options) {
+  const completed = spawnSync(command, arguments_, { encoding: 'utf8', ...options });
+  assert.strictEqual(completed.status, 2, `expected HOLD exit, got ${completed.status}: ${completed.stderr || completed.stdout}`);
+  const body = JSON.parse(completed.stdout);
+  assert.strictEqual(body.status, 'HOLD');
+  return body;
+}
+
 const request = { schema: REQUEST_SCHEMA, scenario: SCENARIO, seed: 'package-consumer-proof', ticks: 28 };
 
 (function capabilityDescriptionMatchesRunnableSurface() {
@@ -82,6 +90,42 @@ const request = { schema: REQUEST_SCHEMA, scenario: SCENARIO, seed: 'package-con
   const held = spawnSync(process.execPath, [command, 'run', '--ticks', '1001'], { encoding: 'utf8' });
   assert.strictEqual(held.status, 2);
   assert.strictEqual(JSON.parse(held.stdout).status, 'HOLD');
+})();
+
+(function receiptFileAdmissionRejectsAmbiguousOrUnsafeBytes() {
+  const command = path.resolve(__dirname, '../bin/anomaly-garden.cjs');
+  const receipt = runScenario({ ...request, seed: 'strict-receipt-input' });
+  const json = JSON.stringify(receipt);
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'anomaly-garden-receipt-admission-'));
+
+  const duplicatePath = path.join(directory, 'duplicate.json');
+  fs.writeFileSync(duplicatePath, `{"schema":${JSON.stringify(receipt.schema)},${json.slice(1)}`);
+  let held = executeHeld(process.execPath, [command, 'verify', duplicatePath]);
+  assert.strictEqual(held.code, 'AXM_RECEIPT_FILE_AMBIGUOUS_JSON');
+
+  const escapedDuplicatePath = path.join(directory, 'escaped-duplicate.json');
+  fs.writeFileSync(escapedDuplicatePath, `{"schem\\u0061":${JSON.stringify(receipt.schema)},${json.slice(1)}`);
+  held = executeHeld(process.execPath, [command, 'verify', escapedDuplicatePath]);
+  assert.strictEqual(held.code, 'AXM_RECEIPT_FILE_AMBIGUOUS_JSON');
+
+  const oversizedPath = path.join(directory, 'oversized.json');
+  fs.writeFileSync(oversizedPath, Buffer.concat([Buffer.alloc((1024 * 1024) + 1, 0x20), Buffer.from(json)]));
+  held = executeHeld(process.execPath, [command, 'verify', oversizedPath]);
+  assert.strictEqual(held.code, 'AXM_RECEIPT_FILE_TOO_LARGE');
+
+  const invalidUtf8Path = path.join(directory, 'invalid-utf8.json');
+  fs.writeFileSync(invalidUtf8Path, Buffer.concat([Buffer.from(' '), Buffer.from([0x80]), Buffer.from(json)]));
+  held = executeHeld(process.execPath, [command, 'verify', invalidUtf8Path]);
+  assert.strictEqual(held.code, 'AXM_RECEIPT_FILE_INVALID_UTF8');
+
+  if (process.platform !== 'win32') {
+    const targetPath = path.join(directory, 'target.json');
+    const symlinkPath = path.join(directory, 'receipt-link.json');
+    fs.writeFileSync(targetPath, json);
+    fs.symlinkSync(targetPath, symlinkPath);
+    held = executeHeld(process.execPath, [command, 'verify', symlinkPath]);
+    assert.strictEqual(held.code, 'AXM_RECEIPT_FILE_NOT_REGULAR');
+  }
 })();
 
 (function packedTarballWorksFromCleanExternalDirectory() {

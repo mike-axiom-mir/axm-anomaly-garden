@@ -37,7 +37,11 @@ anomaly-garden run --seed consumer-proof --ticks 28 > receipt.json
 anomaly-garden verify receipt.json
 ```
 
-`verify` checks the canonical receipt SHA-256 and then fully re-executes the declared seed, scenario and tick count. Altered or even re-sealed false results fail because they do not match replay. Requests reject unknown fields, unsupported scenarios, control characters, non-integer ticks and work above the 1,000-tick bound.
+`verify` checks the canonical receipt SHA-256 and then fully re-executes the declared seed, scenario and tick count. Before semantic verification, the command admits the named receipt file through a bounded raw-byte boundary: the path must name a regular non-symlink file, the file must be no larger than 1 MiB, its bytes must be valid UTF-8, and JSON objects must not contain duplicate decoded member names. Escaped-equivalent names such as `schema` and `schem\u0061` therefore conflict rather than collapsing through last-key-wins parsing. The command also compares the named file identity with the opened file and rejects observable size/timestamp drift during the read. Receipt-file admission failures return `HOLD` with a stable `AXM_RECEIPT_FILE_*` code.
+
+These checks protect the packaged command's file-input boundary; they are not an authorship or hostile-filesystem guarantee. The library-level `verifyReceipt(object)` receives an already-materialized JavaScript object and therefore cannot recover duplicate textual JSON members or invalid source bytes that a caller already discarded before invoking it.
+
+Requests reject unknown fields, unsupported scenarios, control characters, non-integer ticks and work above the 1,000-tick bound.
 
 The package requires Node.js 18 or newer and has no runtime dependencies, network calls, account, telemetry, AI model or cloud service.
 

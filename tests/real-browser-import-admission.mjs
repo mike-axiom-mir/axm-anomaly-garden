@@ -94,7 +94,8 @@ try {
   }, valid.serialized);
 
   const corrupted = JSON.parse(valid.serialized);
-  corrupted.seed = (Number(corrupted.seed) + 1) >>> 0;
+  assert(corrupted.state && typeof corrupted.state === 'object', 'serialized fixture must expose canonical state envelope');
+  corrupted.state.seed = (Number(corrupted.state.seed) + 1) >>> 0;
   const semanticProblems = await page.evaluate((candidate) => window.AnomalyGardenStateContract.validateSerializedState(candidate).problems, corrupted);
   assert(semanticProblems.some((problem) => problem.code === 'SEED_IDENTITY_MISMATCH'), 'fixture must violate deterministic seed identity');
 

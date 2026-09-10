@@ -161,7 +161,19 @@ const request = { schema: REQUEST_SCHEMA, scenario: SCENARIO, seed: 'package-con
 
   const installedCommand = path.join(consumer, 'node_modules', 'axm-anomaly-garden', 'bin', 'anomaly-garden.cjs');
   const installedRun = execute(process.execPath, [installedCommand, 'run', '--seed', 'installed-command', '--ticks', '7'], { cwd: consumer });
-  assert.strictEqual(JSON.parse(installedRun.stdout).result.status, 'PASS');
+  const installedReceipt = JSON.parse(installedRun.stdout);
+  assert.strictEqual(installedReceipt.result.status, 'PASS');
+
+  const installedReceiptPath = path.join(consumer, 'installed-receipt.json');
+  fs.writeFileSync(installedReceiptPath, JSON.stringify(installedReceipt));
+  const installedVerify = execute(process.execPath, [installedCommand, 'verify', installedReceiptPath], { cwd: consumer });
+  assert.strictEqual(JSON.parse(installedVerify.stdout).status, 'PASS');
+
+  const installedDuplicatePath = path.join(consumer, 'installed-duplicate.json');
+  const installedJson = JSON.stringify(installedReceipt);
+  fs.writeFileSync(installedDuplicatePath, `{"schema":${JSON.stringify(installedReceipt.schema)},${installedJson.slice(1)}`);
+  const installedHeld = executeHeld(process.execPath, [installedCommand, 'verify', installedDuplicatePath], { cwd: consumer });
+  assert.strictEqual(installedHeld.code, 'AXM_RECEIPT_FILE_AMBIGUOUS_JSON');
 })();
 
 console.log('Anomaly Garden package consumer tests: PASS');

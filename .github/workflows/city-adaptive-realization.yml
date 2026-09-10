@@ -1,0 +1,56 @@
+name: City adaptive realization
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'automation/experience-adaptive-realization-*'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Contract · Node ${{ matrix.node }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Check adaptive realization syntax
+        run: |
+          node --check src/city-fidelity.js
+          node --check tests/city-fidelity.test.js
+          node --check tests/city-fidelity-browser.mjs
+      - name: Run complete deterministic suite
+        run: npm test
+
+  chromium:
+    name: Real Living Matrix · Chromium
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run focused realization contract
+        run: node tests/city-fidelity.test.js
+      - name: Install CI-only browser harness
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Exercise real Living Matrix surface
+        run: node tests/city-fidelity-browser.mjs
+      - name: Preserve realization evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: anomaly-garden-city-adaptive-realization
+          path: artifacts/city-fidelity/
+          if-no-files-found: warn

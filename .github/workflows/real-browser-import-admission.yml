@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'automation/truth-sentinel-real-browser-import-evidence-*'
+      - 'automation/truth-sentinel-browser-file-intake-*'
 
 permissions:
   contents: read
@@ -16,9 +17,19 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact source head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify browser file admission contract
+        run: |
+          node --check src/browser-file-admission.js
+          node tests/browser-file-admission.test.js
       - name: Run inherited deterministic suite
         run: npm test
       - name: Install CI-only browser harness

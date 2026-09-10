@@ -23,7 +23,7 @@ jobs:
         run: npm test
       - name: Install CI-only browser harness
         run: |
-          npm install --no-save --no-package-lock playwright@1.55.0
+          npm install --no-save --no-package-lock playwright@1.63.0
           npx playwright install --with-deps chromium
       - name: Exercise real Chromium file import admission
         run: node tests/real-browser-import-admission.mjs

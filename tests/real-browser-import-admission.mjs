@@ -7,6 +7,7 @@ import { chromium } from 'playwright';
 
 const root = resolve(fileURLToPath(new URL('../', import.meta.url)));
 const artifactDir = resolve(root, 'artifacts', 'browser-import-admission');
+const maxStateFileBytes = 16 * 1024 * 1024;
 
 const contentTypes = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -64,6 +65,13 @@ try {
     return fingerprint && fingerprint !== '--------';
   });
 
+  const browserAdmission = await page.evaluate(() => ({
+    schema: window.AnomalyGardenBrowserFileAdmission?.SCHEMA,
+    maxBytes: window.AnomalyGardenBrowserFileAdmission?.MAX_STATE_FILE_BYTES
+  }));
+  assert.equal(browserAdmission.schema, 'axm-anomaly-garden/browser-file-admission/v1');
+  assert.equal(browserAdmission.maxBytes, maxStateFileBytes);
+
   const valid = await page.evaluate(() => {
     const simulation = new window.AnomalyGardenSim.GardenSimulation({
       seed: 'browser-import-proof-001',
@@ -116,6 +124,28 @@ try {
   assert.equal(await page.locator('#tick').textContent(), baseline.tick, 'rejected file must not replace the live tick');
   assert.equal(await page.locator('#metric-fingerprint').textContent(), baseline.fingerprint, 'rejected file must not replace the live canonical fingerprint');
 
+  await page.evaluate(() => {
+    window.__axmFileTextReads = 0;
+    const originalText = File.prototype.text;
+    File.prototype.text = function (...args) {
+      window.__axmFileTextReads += 1;
+      return originalText.apply(this, args);
+    };
+  });
+
+  await page.locator('#import-file').setInputFiles({
+    name: 'oversized-state.json',
+    mimeType: 'application/json',
+    buffer: Buffer.alloc(maxStateFileBytes + 1, 0x20)
+  });
+  await page.waitForFunction(() => (document.getElementById('status')?.textContent || '').startsWith('Import rejected: AXM_BROWSER_IMPORT_TOO_LARGE'));
+
+  const oversizedStatus = await page.locator('#status').textContent();
+  assert.match(oversizedStatus, /^Import rejected: AXM_BROWSER_IMPORT_TOO_LARGE/);
+  assert.equal(await page.evaluate(() => window.__axmFileTextReads), 0, 'oversized browser file must be held before the existing File.text() reader runs');
+  assert.equal(await page.locator('#tick').textContent(), baseline.tick, 'oversized file must not replace the live tick');
+  assert.equal(await page.locator('#metric-fingerprint').textContent(), baseline.fingerprint, 'oversized file must not replace the live canonical fingerprint');
+
   await page.locator('#step').click();
   await page.waitForFunction((tick) => document.getElementById('tick')?.textContent === String(tick), expectedAfterStep.tick);
   assert.equal(await page.locator('#metric-fingerprint').textContent(), expectedAfterStep.fingerprint, 'post-rejection continuation must match deterministic continuation from the last admitted state');
@@ -125,10 +155,15 @@ try {
 
   await mkdir(artifactDir, { recursive: true });
   const receipt = {
-    schema: 'axm-anomaly-garden/browser-import-admission-evidence-v1',
+    schema: 'axm-anomaly-garden/browser-import-admission-evidence-v2',
     browser: await browser.version(),
     origin,
+    fileAdmission: {
+      schema: browserAdmission.schema,
+      maxBytes: browserAdmission.maxBytes
+    },
     validImport: {
+      byteLength: Buffer.byteLength(valid.serialized, 'utf8'),
       tick: valid.tick,
       fingerprint: valid.fingerprint,
       admitted: true
@@ -139,6 +174,13 @@ try {
       status: rejectedStatus,
       liveStateUnchanged: true
     },
+    oversizedImport: {
+      byteLength: maxStateFileBytes + 1,
+      rejectedBeforeFileText: true,
+      fileTextReads: await page.evaluate(() => window.__axmFileTextReads),
+      status: oversizedStatus,
+      liveStateUnchanged: true
+    },
     continuation: {
       tick: expectedAfterStep.tick,
       fingerprint: expectedAfterStep.fingerprint,
@@ -146,10 +188,10 @@ try {
     },
     pageErrors,
     consoleErrors,
-    boundary: 'Real Chromium file-input/change/import controller + shared browser semantic contract. This is not an OS-native file-dialog, authorship, signature, or cross-browser proof.'
+    boundary: 'Real Chromium file-input/change path + pre-read browser size admission + shared semantic state contract. This is not a general memory cap, hostile-script sandbox, OS-native file-dialog, authorship, signature, or cross-browser proof.'
   };
   await writeFile(resolve(artifactDir, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n', 'utf8');
-  await page.screenshot({ path: resolve(artifactDir, 'rejected-state-preserved.png'), fullPage: true });
+  await page.screenshot({ path: resolve(artifactDir, 'oversized-state-held.png'), fullPage: true });
   process.stdout.write(JSON.stringify(receipt, null, 2) + '\n');
 } finally {
   await browser.close();

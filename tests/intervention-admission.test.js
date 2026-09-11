@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const { GardenSimulation } = require('../src/sim.js');
+const { GardenSimulation, INTERVENTION_NUMBER_ERROR } = require('../src/sim.js');
 
 function assertRejectedWithoutMutation(label, invoke, field) {
   const sim = new GardenSimulation({ seed: 'intervention-admission-' + label });
@@ -16,7 +16,7 @@ function assertRejectedWithoutMutation(label, invoke, field) {
   assert.throws(
     () => invoke(sim),
     (error) => error &&
-      error.code === 'AXM_INTERVENTION_NUMBER_INVALID' &&
+      error.code === INTERVENTION_NUMBER_ERROR &&
       error.field === field,
     label + ' should fail with a stable field-specific admission error'
   );

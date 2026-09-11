@@ -62,6 +62,8 @@ Local replicators consume material and energy. If the required stock is absent, 
 
 `runCompletionAudit()` is the explicit mutating action. It increments audit metrics and writes a causal `world.completion-audit` receipt.
 
+Root `addAnomaly()` and `addModal()` interventions admit every supplied numeric option before consuming RNG, identifiers, receipts or live state. Non-finite values fail with `AXM_INTERVENTION_NUMBER_INVALID` and identify the rejected field; finite values retain the established defaulting, clamping and integer-period behavior.
+
 The browser includes a final Living Matrix panel for planting the completion scenario, running a resident task, convening an assembly, attempting gate transit, running the explicit integrity audit and reading the selected subworld's economy/security/institution state.
 
 ## Bounded security truth boundary
@@ -86,7 +88,7 @@ npm test
 npm run study:completion
 ```
 
-`npm test` runs fifteen regression entrypoints spanning the original world, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity and offline browser wiring.
+`npm test` runs sixteen regression entrypoints spanning the original world, root-intervention admission, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity and offline browser wiring.
 
 `npm run study:completion` runs the v0.16 scenario across multiple deterministic seeds and fails if any integrity audit fails, save/restore fingerprints diverge, resident experiments/investigations/model breaks never occur, assemblies never occur, or the explicit resident transit fails to occur once per seed.
 
@@ -126,5 +128,6 @@ The feature lane ends at v0.16. Preserve these invariants when repairing the rep
 - no-loss quarantine/history
 - source-linked institutions with no raw Worldglass access
 - pure observation: read-only Worldglass methods must not mutate canonical state
+- rejected root interventions must not consume RNG, identifiers, receipts or canonical state
 
 Read [`AGENTS.md`](AGENTS.md) before contributing. The historical v0.12 lane record remains in [`LANE_001.md`](LANE_001.md); the final v0.13–v0.16 completion record is [`FINAL_HANDOFF.md`](FINAL_HANDOFF.md).

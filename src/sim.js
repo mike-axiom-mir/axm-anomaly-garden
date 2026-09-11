@@ -32,6 +32,29 @@
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const round = (value, digits) => Number(value.toFixed(digits == null ? 3 : digits));
   const deepClone = (value) => JSON.parse(JSON.stringify(value));
+  const INTERVENTION_NUMBER_ERROR = 'AXM_INTERVENTION_NUMBER_INVALID';
+
+  function admitInterventionNumber(options, field, fallback, defaultWhenNullish) {
+    const raw = options[field];
+    if (raw !== undefined) {
+      let supplied;
+      try {
+        supplied = Number(raw);
+      } catch (cause) {
+        supplied = NaN;
+      }
+      if (!Number.isFinite(supplied)) {
+        const error = new RangeError('Intervention option "' + field + '" must be a finite number');
+        error.code = INTERVENTION_NUMBER_ERROR;
+        error.field = field;
+        throw error;
+      }
+    }
+    const selected = defaultWhenNullish
+      ? (raw == null ? fallback : raw)
+      : (raw || fallback);
+    return Number(selected);
+  }
   const FIRST_NAMES = ['Ada', 'Miro', 'June', 'Sol', 'Iris', 'Niko', 'Tess', 'Rune', 'Pax', 'Lio', 'Mara', 'Noa', 'Orin', 'Vera', 'Kian', 'Eli'];
   const ROLES = ['maker', 'maintainer', 'analyst', 'clerk', 'courier', 'gardener'];
 
@@ -336,14 +359,17 @@
 
     addAnomaly(kind, options) {
       const opts = options || {};
+      const radius = admitInterventionNumber(opts, 'radius', 1.8, false);
+      const intensity = admitInterventionNumber(opts, 'intensity', 0.72, false);
+      const ttl = admitInterventionNumber(opts, 'ttl', 18, false);
       const anomaly = {
         id: makeId('anomaly', this.nextAnomalyId++),
         kind: kind || 'gravity-slip',
         x: Number.isInteger(opts.x) ? clamp(opts.x, 0, this.config.width - 1) : Math.floor(this.random() * this.config.width),
         y: Number.isInteger(opts.y) ? clamp(opts.y, 0, this.config.height - 1) : Math.floor(this.random() * this.config.height),
-        radius: clamp(Number(opts.radius || 1.8), 0.5, 6),
-        intensity: clamp(Number(opts.intensity || 0.72), 0.05, 1),
-        ttl: Math.max(1, Math.floor(Number(opts.ttl || 18))),
+        radius: clamp(radius, 0.5, 6),
+        intensity: clamp(intensity, 0.05, 1),
+        ttl: Math.max(1, Math.floor(ttl)),
         createdAt: this.tick,
         active: true
       };
@@ -356,13 +382,16 @@
 
     addModal(options) {
       const opts = options || {};
+      const radius = admitInterventionNumber(opts, 'radius', 2.6, false);
+      const period = admitInterventionNumber(opts, 'period', 12, false);
+      const memoryLeak = admitInterventionNumber(opts, 'memoryLeak', 0.28, true);
       const zone = {
         id: makeId('modal', this.nextModalId++),
         x: Number.isInteger(opts.x) ? clamp(opts.x, 0, this.config.width - 1) : Math.floor(this.random() * this.config.width),
         y: Number.isInteger(opts.y) ? clamp(opts.y, 0, this.config.height - 1) : Math.floor(this.random() * this.config.height),
-        radius: clamp(Number(opts.radius || 2.6), 1, 6),
-        period: Math.max(4, Math.floor(Number(opts.period || 12))),
-        memoryLeak: clamp(Number(opts.memoryLeak == null ? 0.28 : opts.memoryLeak), 0, 1),
+        radius: clamp(radius, 1, 6),
+        period: Math.max(4, Math.floor(period)),
+        memoryLeak: clamp(memoryLeak, 0, 1),
         createdAt: this.tick,
         iteration: 0,
         active: true,
@@ -1202,5 +1231,5 @@
     }
   }
 
-  return { GardenSimulation, DEFAULT_CONFIG, hashSeed, mulberry32 };
+  return { GardenSimulation, DEFAULT_CONFIG, INTERVENTION_NUMBER_ERROR, hashSeed, mulberry32 };
 });

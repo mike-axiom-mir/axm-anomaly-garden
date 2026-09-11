@@ -6,6 +6,7 @@ on:
     branches:
       - 'automation/truth-sentinel-real-browser-import-evidence-*'
       - 'automation/truth-sentinel-browser-file-intake-*'
+      - 'automation/truth-sentinel-browser-strict-json-intake-*'
 
 permissions:
   contents: read
@@ -30,6 +31,7 @@ jobs:
         run: |
           node --check src/browser-file-admission.js
           node tests/browser-file-admission.test.js
+          node tests/browser-strict-file-intake.test.js
       - name: Run inherited deterministic suite
         run: npm test
       - name: Install CI-only browser harness

@@ -1,0 +1,58 @@
+name: Reconcile growth integration
+
+on:
+  push:
+    branches:
+      - integration/growth-days-20260912
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reconcile asserted shared seams
+        run: node tools/reconcile-growth-integration.cjs
+      - name: Regenerate source-bound public discovery artifacts
+        run: node tools/generate-public-capabilities.mjs
+      - name: Verify complete deterministic suite
+        run: npm test
+      - name: Verify state and browser-admission contracts
+        run: |
+          node tests/state-contract.test.js
+          node tests/state-contract-parity.test.js
+          node tests/deserialization-admission.test.js
+          node tests/browser-deserialization-admission.test.js
+          node tests/browser-file-admission.test.js
+          node tests/browser-strict-file-intake.test.js
+      - name: Verify discovery artifacts and focused regressions
+        run: |
+          node tools/generate-public-capabilities.mjs --check
+          node --test tests/public-capability-discovery.test.mjs
+      - name: Verify reconciliation is clean and deterministic
+        run: |
+          node tools/reconcile-growth-integration.cjs
+          node tools/generate-public-capabilities.mjs --check
+          git diff --check
+      - name: Commit reconciled product state
+        run: |
+          git add index.html src/app.js package.json README.md registry/capabilities.jsonl registry/capabilities.receipt.json
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'No reconciliation delta to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Reconcile Anomaly Garden growth integration'
+          git push origin HEAD:integration/growth-days-20260912

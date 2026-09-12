@@ -1,0 +1,159 @@
+/*
+ * Maintenance layer: keep the input -> response -> next-action loop visible
+ * without changing or interpreting canonical simulation state.
+ */
+.control-deck {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+}
+
+.control-deck .inline {
+  min-width: 0;
+}
+
+.control-deck .inline > input,
+.control-deck .inline > select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.control-deck button:disabled {
+  cursor: default;
+  opacity: .48;
+  transform: none;
+}
+
+.action-pulse {
+  position: fixed;
+  z-index: 60;
+  right: clamp(10px, 2vw, 28px);
+  bottom: clamp(10px, 2vw, 24px);
+  width: min(760px, calc(100vw - 20px));
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(190px, .65fr);
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 15px;
+  background: linear-gradient(100deg, rgba(10, 20, 17, .97), rgba(10, 16, 21, .97));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .04);
+  pointer-events: none;
+}
+
+.action-pulse-orb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 5px rgba(141, 255, 194, .08), 0 0 18px rgba(141, 255, 194, .45);
+}
+
+.action-pulse-copy {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 9px;
+  align-items: baseline;
+}
+
+.action-pulse-label {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.action-pulse-copy strong {
+  color: var(--mint);
+  font-size: .72rem;
+  letter-spacing: .08em;
+}
+
+.action-pulse-message {
+  min-width: 0;
+  color: var(--text);
+  font-size: .78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.action-pulse-context {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+
+.action-pulse-context strong {
+  color: var(--text);
+  font-size: .7rem;
+  letter-spacing: .06em;
+}
+
+.action-pulse-context span {
+  color: var(--muted);
+  font-size: .66rem;
+  line-height: 1.25;
+}
+
+.action-pulse[data-state="running"] .action-pulse-orb {
+  animation: action-pulse-running 1.15s ease-in-out infinite;
+}
+
+.action-pulse[data-state="held"] {
+  border-color: rgba(255, 159, 172, .48);
+}
+
+.action-pulse[data-state="held"] .action-pulse-orb {
+  background: var(--danger);
+  box-shadow: 0 0 0 5px rgba(255, 159, 172, .08), 0 0 18px rgba(255, 159, 172, .4);
+}
+
+.action-pulse[data-state="held"] .action-pulse-copy strong {
+  color: var(--danger);
+}
+
+.action-pulse[data-state="paused"] .action-pulse-orb {
+  background: var(--amber);
+  box-shadow: 0 0 0 5px rgba(255, 216, 141, .08);
+}
+
+@keyframes action-pulse-running {
+  0%, 100% { transform: scale(.82); opacity: .66; }
+  50% { transform: scale(1.14); opacity: 1; }
+}
+
+@media (max-width: 620px) {
+  .action-pulse {
+    grid-template-columns: auto minmax(0, 1fr);
+    min-height: 88px;
+    gap: 8px 10px;
+    padding: 10px 12px;
+  }
+
+  .action-pulse-context {
+    grid-column: 2;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .action-pulse-message {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .action-pulse-context span {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-pulse[data-state="running"] .action-pulse-orb {
+    animation: none;
+  }
+}

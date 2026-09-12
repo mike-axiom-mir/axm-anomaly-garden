@@ -1,0 +1,30 @@
+name: Package consumer
+
+on:
+  pull_request:
+    paths:
+      - "bin/**"
+      - "src/portable-runner.js"
+      - "tests/package-consumer.test.js"
+      - "capability.json"
+      - "package.json"
+      - ".github/workflows/package-consumer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-consumer:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Build, install, import, run, and verify local tarball
+        run: npm run test:package

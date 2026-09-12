@@ -16,23 +16,13 @@
 
   function render() {
     const active = sim();
-    world.querySelectorAll('.replicator-marker').forEach((node) => node.remove());
     if (!active || !Array.isArray(active.machinePrograms)) {
       readout.textContent = 'engine not ready';
       return;
     }
     policy.value = active.replicationPolicy || 'off';
     readout.textContent = active.machinePrograms.length + ' programs · load ' + active.systemLoad().toFixed(2) + ' · viability ' + active.systemViability().toFixed(2) + ' · strain ' + (active.metrics.strainEvents || 0);
-    for (const program of active.machinePrograms) {
-      if (!program.active) continue;
-      const marker = document.createElement('div');
-      marker.className = 'replicator-marker';
-      marker.style.gridColumn = program.x + 1;
-      marker.style.gridRow = program.y + 1;
-      marker.textContent = 'R';
-      marker.title = program.id + ' · gen ' + program.generation + ' · locally valid copy chain';
-      world.appendChild(marker);
-    }
+
   }
 
   policy.addEventListener('change', function () {

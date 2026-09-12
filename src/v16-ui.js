@@ -106,6 +106,7 @@
       ensureOptions(active);
       select.value = planted.child.id;
       status('Planted full v0.16 scenario: nested living worlds, explicit gate, local economy, anomaly evidence, replicators, and budgeted security.');
+      document.dispatchEvent(new Event('garden:refresh'));
       render();
     } catch (error) {
       status('Completion scenario rejected: ' + error.message);
@@ -120,6 +121,7 @@
     try {
       const result = active.performSubworldTask(zone.id, resident.id, resident.occupation || 'forage');
       status(result.type === 'subworld.task-completed' ? resident.id + ' completed ' + result.payload.task + '.' : resident.id + ' task blocked: ' + result.payload.reason + '.');
+      document.dispatchEvent(new Event('garden:refresh'));
       render();
     } catch (error) {
       status('Resident task rejected: ' + error.message);
@@ -133,6 +135,7 @@
     try {
       const report = active.conveneSubworldAssembly(zone.id);
       status('Assembly report: ' + report.narrative + ' · source-linked evidence ' + report.sourceReceiptIds.length + ' · dissent ' + report.dissent + '.');
+      document.dispatchEvent(new Event('garden:refresh'));
       render();
     } catch (error) {
       status('Assembly rejected: ' + error.message);
@@ -156,6 +159,7 @@
       const receipt = active.transitResident(gate.id, residents[0].id, zone.id);
       if (receipt.type === 'subworld.resident-transited') status(receipt.payload.residentId + ' crossed ' + gate.id + ' into ' + receipt.payload.toModalId + '; memory and identity were preserved.');
       else status('Transit blocked: ' + receipt.payload.reason + '. Move/let the resident reach the gate first.');
+      document.dispatchEvent(new Event('garden:refresh'));
       render();
     } catch (error) {
       status('Transit rejected: ' + error.message);

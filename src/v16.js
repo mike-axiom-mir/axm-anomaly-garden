@@ -11,6 +11,13 @@
   const mulberry32 = base.mulberry32;
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const finiteNonNegative = (value) => Number.isFinite(Number(value)) && Number(value) >= 0;
+  let nodeStateContract = null;
+
+  function assertCanonicalStateAdmission(parsed) {
+    if (typeof module !== 'object' || !module.exports) return null;
+    if (!nodeStateContract) nodeStateContract = require('./state-contract.js');
+    return nodeStateContract.assertValidSerializedState(parsed);
+  }
 
   const METRICS = {
     completionAudits: 0,
@@ -44,6 +51,7 @@
     static deserialize(text) {
       const parsed = typeof text === 'string' ? JSON.parse(text) : clone(text);
       if (!parsed || parsed.schema !== 'axm-anomaly-garden/state-v1' || !parsed.state) throw new Error('Unsupported Anomaly Garden state file');
+      assertCanonicalStateAdmission(parsed);
       const sim = new GardenSimulation({ seed: parsed.state.seedText || 'imported' });
       sim._restoreState(parsed.state);
       return sim;

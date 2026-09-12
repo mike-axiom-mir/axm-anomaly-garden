@@ -4,7 +4,7 @@
   "private": true,
   "description": "Offline deterministic causal simulation playground.",
   "scripts": {
-    "test": "node tests/sim.test.js && node tests/life.test.js && node tests/institutions.test.js && node tests/institution-actions.test.js && node tests/history.test.js && node tests/replication.test.js && node tests/containment.test.js && node tests/future-explorer.test.js && node tests/nested-modals.test.js && node tests/subworld-security.test.js && node tests/cross-layer.test.js && node tests/local-economy.test.js && node tests/civilization.test.js && node tests/completion.test.js && node tests/browser-contract.test.js",
+    "test": "node tests/sim.test.js && node tests/intervention-admission.test.js && node tests/life.test.js && node tests/institutions.test.js && node tests/institution-actions.test.js && node tests/history.test.js && node tests/replication.test.js && node tests/containment.test.js && node tests/future-explorer.test.js && node tests/nested-modals.test.js && node tests/subworld-security.test.js && node tests/cross-layer.test.js && node tests/local-economy.test.js && node tests/civilization.test.js && node tests/completion.test.js && node tests/browser-contract.test.js && node tests/world-renderer.test.js && node tests/city-projection.test.js && node tests/city-signals.test.js && node tests/city-renderer.test.js && node tests/living-city.test.js && node tests/city-fidelity.test.js && node tests/action-feedback.test.js && node tests/package-consumer.test.js",
     "experiment:repair": "node tools/compare-repair-policies.js",
     "study:repair": "node tools/batch-policy-study.js 24",
     "study:institutions": "node tools/institution-study.js 24",
@@ -15,6 +15,41 @@
     "study:futures": "node tools/future-explorer-study.js",
     "study:nested-modals": "node tools/nested-modal-study.js",
     "study:subworld-security": "node tools/subworld-security-study.js 12 35",
-    "study:completion": "node tools/completion-study.js 12 60"
-  }
+    "study:completion": "node tools/completion-study.js 12 60",
+    "dev": "vite",
+    "test:package": "node tests/package-consumer.test.js"
+  },
+  "devDependencies": {
+    "vite": "^8.2.2"
+  },
+  "main": "./src/v16.js",
+  "exports": {
+    ".": "./src/v16.js",
+    "./runner": "./src/portable-runner.js",
+    "./capability.json": "./capability.json"
+  },
+  "bin": {
+    "anomaly-garden": "./bin/anomaly-garden.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/anomaly-garden.cjs",
+    "capability.json",
+    "PACKAGE_CONSUMER.md",
+    "THIRD_PARTY.json",
+    "src/sim.js",
+    "src/v07.js",
+    "src/v08.js",
+    "src/v09.js",
+    "src/v10.js",
+    "src/v11.js",
+    "src/v12.js",
+    "src/v13.js",
+    "src/v14.js",
+    "src/v15.js",
+    "src/v16.js",
+    "src/portable-runner.js"
+  ]
 }

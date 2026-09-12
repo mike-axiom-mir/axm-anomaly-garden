@@ -62,6 +62,8 @@ Local replicators consume material and energy. If the required stock is absent, 
 
 `runCompletionAudit()` is the explicit mutating action. It increments audit metrics and writes a causal `world.completion-audit` receipt.
 
+Root `addAnomaly()` and `addModal()` interventions admit every supplied numeric option before consuming RNG, identifiers, receipts or live state. Non-finite values fail with `AXM_INTERVENTION_NUMBER_INVALID` and identify the rejected field; finite values retain the established defaulting, clamping and integer-period behavior.
+
 The browser includes a final Living Matrix panel for planting the completion scenario, running a resident task, convening an assembly, attempting gate transit, running the explicit integrity audit and reading the selected subworld's economy/security/institution state.
 
 ## Bounded security truth boundary
@@ -77,6 +79,26 @@ Before an action succeeds, the target must pass jurisdiction, capability, knowle
 
 No security program receives magical access to all simulator state.
 
+## Consume the deterministic engine outside this checkout
+
+The completed v0.16 engine now has a bounded CommonJS package and JSON command
+surface. `npm pack` creates a local, dependency-free tarball; the package stays
+private so it cannot be published to a registry accidentally. External
+consumers can import `GardenSimulation`, run the declared completion scenario,
+and verify a receipt through full deterministic re-execution without copying
+the version-layer source chain.
+
+```bash
+npm pack --pack-destination ./dist
+npm install --ignore-scripts --no-audit --no-fund \
+  ./dist/axm-anomaly-garden-0.16.0.tgz
+npx --no-install anomaly-garden run --seed consumer-proof --ticks 28 > receipt.json
+npx --no-install anomaly-garden verify receipt.json
+```
+
+See [`PACKAGE_CONSUMER.md`](PACKAGE_CONSUMER.md) for offline installation,
+library entrypoints, request limits, and the exact truth boundary.
+
 ## Verification
 
 With Node.js installed:
@@ -86,7 +108,7 @@ npm test
 npm run study:completion
 ```
 
-`npm test` runs fifteen regression entrypoints spanning the original world, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity and offline browser wiring.
+`npm test` runs twenty-four regression entrypoints spanning the original world, root intervention admission, productive life, institutions, causal history, replication/containment, Future Explorer, nested Modals, living subworld security, cross-layer gates, local economy, civilization behavior, completion integrity, offline browser wiring, the Living City realization, visible action feedback and clean external package consumption.
 
 `npm run study:completion` runs the v0.16 scenario across multiple deterministic seeds and fails if any integrity audit fails, save/restore fingerprints diverge, resident experiments/investigations/model breaks never occur, assemblies never occur, or the explicit resident transit fails to occur once per seed.
 
@@ -126,5 +148,28 @@ The feature lane ends at v0.16. Preserve these invariants when repairing the rep
 - no-loss quarantine/history
 - source-linked institutions with no raw Worldglass access
 - pure observation: read-only Worldglass methods must not mutate canonical state
+- rejected root interventions must not consume RNG, identifiers, receipts or canonical state
 
 Read [`AGENTS.md`](AGENTS.md) before contributing. The historical v0.12 lane record remains in [`LANE_001.md`](LANE_001.md); the final v0.13–v0.16 completion record is [`FINAL_HANDOFF.md`](FINAL_HANDOFF.md).
+
+## Matrix world realization — September 2026
+
+The app now opens on a stylized isometric city. Inhabitants visibly walk, work, rest, socialize and investigate according to their recorded state. Follow a resident's real route and destination, watch the camera move to actual world changes, inspect live building stock, or use the navigator, pan and zoom controls. Code view exposes program generations, security knowledge, anomaly strength and institutional narratives.
+
+**Seed living worlds** creates the existing completion scenario. Nested worlds have deterministic depth-specific palettes and architecture; choose one from the World menu or select an enterable portal. **Inject glitch** creates a real anomaly through the existing simulation control. Repair, experiments, memory, model breaks, program copies, quarantine and institutional updates appear when their source state changes.
+
+The expandable **laboratory** retains the exact map, simulation settings, checkpoint/rewind, import/export, evidence and gate actions. City architecture, rain and lighting are presentation; they do not add simulation facts. Viewing another layer does not move a resident. This is a 2.5D realization, not a full 3D game.
+
+See [LIVING_CITY_V1.md](LIVING_CITY_V1.md) for the current expression contract and acceptance evidence. [CITY_REALIZATION.md](CITY_REALIZATION.md) preserves the original gap analysis and earlier browser evidence.
+
+## Earlier animation pass — September 2026
+
+The animation lane adds persistent, state-driven world markers and separate nested-world maps. Consecutive ticks interpolate between recorded positions; skipped ticks, rewinds and imported worlds snap to their recorded state. Anomaly and Modal animation plays while the world is running. Use **Motion → Reduced**, or the operating system's reduced-motion preference, to disable motion. Selecting a nested resident shows its recorded hypothesis and memory count.
+
+Living Matrix actions now refresh the main map and fingerprint immediately. Rendering never advances simulation time or consumes its RNG. The v0.16 engine rules are unchanged.
+
+`npm test` includes the dependency-free renderer regression. An optional DOM integration check can be run with `node tests/dom-integration.cjs` when `jsdom` is installed for development; `AXM_JSDOM_PATH` may point to an external installation. The app itself still opens offline without installing packages.
+
+Browser follow-up: the managed preview successfully rendered the outer and nested worlds. Run advanced the world with visible inhabitant movement; Pause held tick 74; checkpoint/rewind returned to tick 74; Reduced Motion was selectable; the live integrity audit passed with zero errors and warnings. Mobile layout and frame-rate smoothness were not measured.
+
+For development preview, install development dependencies with `npm ci` and run `npm run dev`. Vite is development-only; the offline runtime remains plain local HTML/CSS/JavaScript.

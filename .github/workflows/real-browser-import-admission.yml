@@ -1,0 +1,52 @@
+name: Real browser import admission
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'automation/truth-sentinel-real-browser-import-evidence-*'
+      - 'automation/truth-sentinel-browser-file-intake-*'
+      - 'automation/truth-sentinel-browser-strict-json-intake-*'
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-import:
+    name: Chromium file import truth gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact source head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify browser file admission contract
+        run: |
+          node --check src/browser-file-admission.js
+          node --check tests/real-browser-strict-file-intake.mjs
+          node tests/browser-file-admission.test.js
+          node tests/browser-strict-file-intake.test.js
+      - name: Run inherited deterministic suite
+        run: npm test
+      - name: Install CI-only browser harness
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Exercise real Chromium file import admission
+        run: |
+          node tests/real-browser-import-admission.mjs
+          node tests/real-browser-strict-file-intake.mjs
+      - name: Preserve browser truth evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: anomaly-garden-browser-import-admission
+          path: artifacts/browser-import-admission/
+          if-no-files-found: warn

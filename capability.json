@@ -1,0 +1,39 @@
+{
+  "schema": "axm.capability/v1",
+  "id": "axm.anomaly-garden.deterministic-completion-scenario",
+  "version": "0.16.0",
+  "description": "Run and replay-verify the completed deterministic Anomaly Garden scenario without a repository checkout.",
+  "runtime": {
+    "kind": "node-commonjs",
+    "minimumVersion": "18",
+    "dependencies": [],
+    "networkRequired": false,
+    "accountRequired": false
+  },
+  "entrypoints": {
+    "library": "axm-anomaly-garden",
+    "runner": "axm-anomaly-garden/runner",
+    "command": "anomaly-garden"
+  },
+  "operations": [
+    "describe",
+    "run",
+    "verify"
+  ],
+  "contracts": {
+    "request": "axm.anomaly-garden.run-request/v1",
+    "receipt": "axm.anomaly-garden.run-receipt/v1",
+    "verification": "axm.anomaly-garden.verification-receipt/v1",
+    "scenario": "completion-v0.16",
+    "maximumTicks": 1000
+  },
+  "determinism": {
+    "sameSeedAndTicksReplay": true,
+    "verificationMethod": "canonical receipt digest plus full local re-execution"
+  },
+  "authority": {
+    "changesCanonicalSource": false,
+    "publishesPackage": false,
+    "declaresCanon": false
+  }
+}

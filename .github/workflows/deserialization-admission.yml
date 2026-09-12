@@ -1,0 +1,35 @@
+name: Verify Default Deserialize Admission
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deserialize-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Syntax check admission boundary
+        run: node --check src/v16.js && node --check src/state-contract.js && node --check tests/deserialization-admission.test.js
+      - name: Canonical state contract
+        run: node tests/state-contract.test.js
+      - name: Default deserialize admission regressions
+        run: node tests/deserialization-admission.test.js
+      - name: Complete deterministic regression suite
+        run: npm test
+      - name: Completion save-restore study
+        run: npm run study:completion

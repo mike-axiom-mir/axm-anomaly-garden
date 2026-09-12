@@ -1,0 +1,70 @@
+{
+  "schema": "axm.public-capability-registry-receipt/v1",
+  "repository": "mike-axiom-mir/axm-anomaly-garden",
+  "registry": {
+    "path": "registry/capabilities.jsonl",
+    "sha256": "98d653d2c8707e8519cb2f593114da33ce7b1b973811ca0a2ab4355bea0a2b4e",
+    "capability_count": 1,
+    "capability_ids": [
+      "axm.anomaly-garden.deterministic-completion-scenario"
+    ]
+  },
+  "sources": [
+    {
+      "path": "package.json",
+      "git_blob_sha1": "a75ad95e810873655ce29f1c336369d03c844950"
+    },
+    {
+      "path": "capability.json",
+      "git_blob_sha1": "38fa6906cf76f826f52d612d4eab1b21086fabf1"
+    },
+    {
+      "path": "bin/anomaly-garden.cjs",
+      "git_blob_sha1": "0f270dc2a01107b520af5803804b564934601119"
+    },
+    {
+      "path": "src/portable-runner.js",
+      "git_blob_sha1": "fd1e5780aa6843837db3c247a5e076842c1e6db1"
+    },
+    {
+      "path": "LICENSE",
+      "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+    },
+    {
+      "path": ".axm/discovery-public.json",
+      "git_blob_sha1": "a15afb87fbfc0f5b4b975411d907497cadac74da"
+    }
+  ],
+  "compatibility": {
+    "consumer": "mike-axiom-mir/axm-discovery-buddy",
+    "pinned_ref": "1a94fc2481d1cfc9234dea7c86af4777126d3924",
+    "marker_contract": "axm.discovery-public/v1",
+    "registry_contract": "registry/*capabilit*.jsonl"
+  },
+  "pattern_provenance": {
+    "adapted_from_repository": "mike-axiom-mir/axm-EchoWorld",
+    "adapted_from_ref": "6987cf842a0f17e03f2ef679d07ec5782b30664b",
+    "adapted_paths": [
+      ".axm/discovery-public.json",
+      "tools/generate-public-capabilities.mjs",
+      "tests/public-capability-discovery.test.mjs",
+      ".github/workflows/public-capability-discovery.yml"
+    ],
+    "adaptation": "CommonJS provider contract, explicit unknown status, executable CLI descriptor check",
+    "copied_runtime_code": false
+  },
+  "truth_boundary": {
+    "source_backed": true,
+    "public_export_intent": true,
+    "provider_status_declared": false,
+    "status_invented": false,
+    "runtime_proof": false,
+    "package_published": false,
+    "execution_authority": false,
+    "automatic_selection_authority": false,
+    "automatic_install_authority": false,
+    "merge_authority": false,
+    "canon_authority": false
+  },
+  "receipt_sha256": "d9d309cad19337feb7b8a314aec320ae21c6a3008aa5cab49ac4fec556e66895"
+}
